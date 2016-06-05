@@ -1,0 +1,22 @@
+<!--
+  ~  Copyright (C) 2016 Delight Solutions Ltd., All Rights Reserved
+  ~  Unauthorized copying of this file, via any medium is strictly prohibited.
+  ~  Proprietary and confidential.
+  ~
+  ~  All information contained herein is, and remains the property of Delight Solutions Kft.
+  ~  The intellectual and technical concepts contained herein are proprietary to Delight Solutions Kft.
+  ~   and may be covered by U.S. and Foreign Patents, pending patents, and are protected
+  ~  by trade secret or copyright law. Dissemination of this information or reproduction of
+  ~  this material is strictly forbidden unless prior written permission is obtained from
+  ~   Delight Solutions Kft.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0">
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M3,18h18v-2L3,16v2zM3,13h18v-2L3,11v2zM3,6v2h18L21,6L3,6z" />
+</vector>

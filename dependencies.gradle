@@ -1,0 +1,197 @@
+/*
+ *  Copyright (C) 2016 Delight Solutions Ltd., All Rights Reserved
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  All information contained herein is, and remains the property of Delight Solutions Kft.
+ *  The intellectual and technical concepts contained herein are proprietary to Delight Solutions Kft.
+ *   and may be covered by U.S. and Foreign Patents, pending patents, and are protected
+ *  by trade secret or copyright law. Dissemination of this information or reproduction of
+ *  this material is strictly forbidden unless prior written permission is obtained from
+ *   Delight Solutions Kft.
+ */
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+/**
+ * Dependency version definitions. Use exact version numbers instead od '+'
+ * may cause breakage in the code with automatic upgrade)
+ **/
+def supportVersion = '23.3.0'
+ext.versions = [//Android framework
+                code                         : 1,
+                name                         : '1.0',
+
+                androidBuildToolsVersion     : "23.0.3",
+                androidMinSdkVersion         : 15,
+                androidTargetSdkVersion      : 23,
+                androidCompileSdkVersion     : 23,
+                multidexVersion              : '1.0.1',
+
+                androidGradlePlugin          : '2.1.0',
+                aptGradlePlugin              : '1.8',
+                paperworkGradlePlugin        : '1.2.7',
+                retrolambdaGradlePlugin      : '3.2.5',
+                jacocoGradlePlugin           : '0.7.6.201602180812',
+                androidDevMetricsGradlePlugin: '0.4',
+
+                //Android support Libraries
+                //Global support version, change individually as needed.
+                recyclerViewVersion          : supportVersion,
+                cardViewVersion              : supportVersion,
+                supportV4Version             : supportVersion,
+                supportV7Version             : supportVersion,
+                supportDesignVersion         : supportVersion,
+                supportPreferenceVersion     : '23.3.0.4-beta',
+
+                //Google libraries
+                googlePlayServicesVersion    : '7.5.0',
+                gAnalyticsVersion            : '8.1.0',
+
+                //Optional, Collections, Guava like but lightweight on method count library
+                arrowVersion                 : '1.0.0',
+                //Dependency Injection
+                daggerVersion                : '2.4',
+                daggerCompilerVersion        : '2.1',
+                javaxAnnotationVersion       : '1.2',
+                javaxInject                  : '1',
+                javaxAnnotationApi           : '1.2',
+                jsrAnnotationVersion         : '1.0',
+
+                //Libraries used for application building, Networking, Threading etc.
+                butterKnifeVersion           : '8.0.1',
+                rxJavaVersion                : '1.1.3',
+                rxLintVersion                : '1.0',
+                rxAndroidVersion             : '0.24.0',
+                gsonVersion                  : '2.3.1',
+                retrofitVersion              : '1.9.0',
+                okHttpVersion                : '2.3.0',
+                picassoVersion               : '2.5.2',
+                androidAnnotationsVersion    : '23.2.1',
+
+                //helper libraries which substitutes default framework solution
+                // of a specified task with more usable API.
+                trikitaLogVersion            : '1.1.1',
+                jodaTimeAndroidVersion       : '2.9.3',
+
+                //Libraries used for QA during development phase for bug-free and performance.
+                leakCanaryVersion            : '1.4-beta2',
+                stethoVersion                : '1.1.1',
+
+                //Per project based libraries as needed, which implement a UI component.
+                twoWayViewVersion            : '1.0.0-,NAPSHOT@aar',
+                ray5137MaterialVersion       : '1.2.1.,-SNAPSHOT',
+                expandableRecycVersion       : '2.0.3', mpAndroidChartVersion: 'v2.1.4',
+                calligaphyVersion            : '2.2.0',
+
+                //Testing Libraries
+                robolectricVersion           : '3.0',
+                jUnitVersion                 : '4.12',
+                assertJVersion               : '1.1.1',
+                testingSupportLibVersion     : '0.5',
+                mockitoVersion               : '1.10.19',
+                dexmakerVersion              : '1.0',
+                espressoVersion              : '2.2.2',]
+
+ext.gradlePlugins = [android          : "com.android.tools.build:gradle:$versions.androidGradlePlugin",
+                     apt              : "com.neenbedankt.gradle.plugins:android-apt:$versions.aptGradlePlugin",
+                     retrolambda      : "me.tatarka:gradle-retrolambda:$versions.retrolambdaGradlePlugin",
+                     lombok           : "me.tatarka.retrolambda.projectlombok:lombok.ast:$versions.lombokGradlePlugin",
+                     paperwork        : "hu.supercluster:paperwork-plugin:$versions.paperworkGradlePlugin",
+                     jacoco           : "org.jacoco:org.jacoco.core:$versions.jacocoGradlePlugin",
+                     androidDevMetrics: "com.frogermcs.androiddevmetrics:androiddevmetrics-plugin:$versions.androidDevMetricsGradlePlugin",]
+
+/**
+ * Dependency definitions
+ **/
+
+//Dependencies used for application building in the presentation (UI layer)
+ext.appBuildingDependencies =
+        [daggerCompiler        : "com.google.dagger:dagger-compiler:${versions.daggerVersion}",
+         dagger                : "com.google.dagger:dagger:${versions.daggerVersion}",
+         javaxInject           : "javax.inject:javax.inject:$versions.javaxInject",
+         javaxAnnotationApi    : "javax.annotation:javax.annotation-api:$versions.javaxAnnotationApi",
+         jsr250JavaxAnnotation : "javax.annotation:jsr250-api:${versions.jsrAnnotationVersion}",
+         rxJava                : "io.reactivex:rxjava:${versions.rxJavaVersion}",
+         rxLint                : "nl.littlerobots.rxlint:rxlint:$versions.rxLintVersion",
+         rxAndroid             : "io.reactivex:rxandroid:${versions.rxAndroidVersion}",
+         arrow                 : "com.fernandocejas:arrow:${versions.arrowVersion}",
+
+         recyclerView          : "com.android.support:recyclerview-v7:${versions.recyclerViewVersion}",
+         cardView              : "com.android.support:cardview-v7:${versions.cardViewVersion}",
+         supportV4             : "com.android.support:support-v4:${versions.supportV4Version}",
+         supportV7             : "com.android.support:appcompat-v7:${versions.supportV7Version}",
+         supportDesign         : "com.android.support:design:${versions.supportDesignVersion}",
+         supportPercent        : "com.android.support:percent:${supportVersion}",
+         supportPreference     : "com.takisoft.fix:preference-v7:${versions.supportPreferenceVersion}",
+         androidAnnotations    : "com.android.support:support-annotations:${versions.androidAnnotationsVersion}",
+
+         gmsfull               : "com.google.android.gms:play-services:${versions.googlePlayServicesVersion}",
+         gmsBase               : "com.google.android.gms:play-services-base:${versions.googlePlayServicesVersion}",
+         gmsIdentity           : "com.google.android.gms:play-services-identity:${versions.googlePlayServicesVersion}",
+         gmsPlus               : "com.google.android.gms:play-services-plus:${versions.googlePlayServicesVersion}",
+         gmsMaps               : "com.google.android.gms:play-services-maps:${versions.googlePlayServicesVersion}",
+         gmsLocation           : "com.google.android.gms:play-services-location:${versions.googlePlayServicesVersion}",
+         butterKnife           : "com.jakewharton:butterknife:${versions.butterKnifeVersion}",
+         butterKnifeCompiler   : "com.jakewharton:butterknife-compiler:${versions.butterKnifeVersion}",
+         trikitaLog            : "co.trikita:log:${versions.trikitaLogVersion}",
+
+         leakcanary_debug      : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanaryVersion}",
+         leakcanary_release    : "com.squareup.leakcanary:leakcanary-android-no-op:${versions.leakCanaryVersion}",
+         jodaTimeAndroid       : "net.danlew:android.joda:${versions.jodaTimeAndroidVersion}",
+         calligraphy           : "uk.co.chrisjenx:calligraphy:${versions.calligaphyVersion}",
+         twoWayView            : "org.lucasr.twowayview:twowayview:${versions.twoWayViewVersion}",
+         ray5137Material       : "com.github.rey5137:material:${versions.ray5137MaterialVersion}",
+         twowayview            : "org.lucasr.twowayview:core:${versions.twoWayViewVersion}",
+         twowayviewLayouts     : "org.lucasr.twowayview:layouts:${versions.twoWayViewVersion}",
+         expandableRecyclerView: "com.bignerdranch.android:expandablerecyclerview:${versions.expandableRecycVersion}",
+         mpAndroidChart        : "com.github.PhilJay:MPAndroidChart:${versions.mpAndroidChartVersion}",
+         picasso               : "com.squareup.picasso:picasso:${versions.picassoVersion}",
+         gAnalytics            : "com.google.android.gms:play-services-analytics:${versions.gAnalyticsVersion}",
+         multidex              : "com.android.support:multidex:${versions.multidexVersion}",]
+
+//Dependencies used for application building in the data layer (networking, entites, mappers.)
+ext.dataDependencies = [retrofit     : "com.squareup.retrofit:retrofit:${versions.retrofitVersion}",
+                        okHttp       : "com.squareup.okhttp:okhttp:${versions.okHttpVersion}",
+                        gson         : "com.google.code.gson:gson:${versions.gsonVersion}",
+                        stetho       : "com.facebook.stetho:stetho-urlconnection:${versions.stethoVersion}",
+                        stetho_okhttp: "com.facebook.stetho:stetho-okhttp:${versions.stethoVersion}"]
+
+//Instrumentation UI testing dependencies.
+ext.uiTestDependencies = [mockito              : "org.mockito:mockito-core:${versions.mockitoVersion}",
+                          dexmaker             : "com.google.dexmaker:dexmaker:${versions.dexmakerVersion}",
+                          dexmakerMockito      : "com.google.dexmaker:dexmaker-mockito:${versions.dexmakerVersion}",
+                          espresso             : "com.android.support.test.espresso:espresso-core:${versions.espressoVersion}",
+                          testingSupportComtrib: "com.android.support.test.espresso:espresso-contrib:${versions.espressoVersion}",
+                          testingSupportIdling : "com.android.support.test.espresso:espresso-idling-resource:${versions.espressoVersion}",
+                          testingSupportLib    : "com.android.support.test:testing-support-lib:${versions.testingSupportLibVersion}",
+                          testingSupportRunner : "com.android.support.test:runner:${versions.testingSupportLibVersion}",
+                          testingSupportRules  : "com.android.support.test:rules:${versions.testingSupportLibVersion}"]
+
+//Android framework independent unit testing dependencies
+ext.unitTestDependencies = [junit          : "junit:junit:${versions.jUnitVersion}",
+                            assertj        : "com.squareup.assertj:assertj-android:${versions.assertJVersion}",
+                            mockito        : "org.mockito:mockito-core:${versions.mockitoVersion}",
+                            leakcanary_test: "com.squareup.leakcanary:leakcanary-android-no-op:${versions.leakCanaryVersion}"
+
+]
+
+//Robolectric unit testing dependencies.
+ext.robolectricTestDependencies = [junit      : "junit:junit:${versions.jUnitVersion}",
+                                   assertj    : "com.squareup.assertj:assertj-android:${versions.assertJVersion}",
+                                   mockito    : "org.mockito:mockito-core:${versions.mockitoVersion}",
+                                   robolectric: "org.robolectric:robolectric:${versions.robolectricVersion}",]
+
+ext {
+    printTests = this.&printTests
+
+    robolectricConfig = [include         : "**/*Test.class",
+                         exclude         : "**/espresso/**/*.class",
+                         maxHeapSize     : '2048m',
+                         maxParallelForks: 4,
+                         forkEvery       : 150,
+                         ignoreFailures  : false]
+}

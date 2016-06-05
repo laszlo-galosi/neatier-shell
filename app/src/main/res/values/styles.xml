@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~  Copyright (C) 2016 Delight Solutions Ltd., All Rights Reserved
+  ~  Unauthorized copying of this file, via any medium is strictly prohibited.
+  ~  Proprietary and confidential.
+  ~
+  ~  All information contained herein is, and remains the property of Delight Solutions Kft.
+  ~  The intellectual and technical concepts contained herein are proprietary to Delight Solutions Kft.
+  ~   and may be covered by U.S. and Foreign Patents, pending patents, and are protected
+  ~  by trade secret or copyright law. Dissemination of this information or reproduction of
+  ~  this material is strictly forbidden unless prior written permission is obtained from
+  ~   Delight Solutions Kft.
+  -->
+
+<resources>
+
+    <style name="AppTextView" parent="android:TextAppearance">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <!--<item name="fontPath">fonts/Roboto-Light.ttf</item>-->
+    </style>
+
+    <style name="AppTextView.title">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <!--<item name="fontPath">fonts/Roboto-Medium.ttf</item>-->
+    </style>
+
+    <style name="AppTextView.helper">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+
+    <style name="AppTextView.normal">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+
+    <style name="ThemeOverlay.AppPopup" parent="Base.ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:colorBackground">@color/colorItemBackground</item>
+    </style>
+
+    <style name="ThemeOverlay.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:colorBackground">@color/colorPrimary</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:actionMenuTextColor">@color/colorTextPrimary</item>
+        <!-- android:textColorSecondary is the color of the menu
+           overflow icon (three vertical dots) -->
+        <item name="android:textColorSecondary">@color/colorTextPrimary</item>
+    </style>
+</resources>

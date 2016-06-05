@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#00BCD4</color>
+    <color name="colorPrimaryDark">#0097A7</color>
+    <color name="colorAccent">#283593</color>
+    <color name="colorSecondary">#B2EBF2</color>
+
+    <color name="white">#ffffff</color>
+    <color name="translucent_100">#00000000</color>
+    <color name="translucent_70">#4c000000</color>
+    <color name="translucent_50">#7f000000</color>
+    <color name="translucent_30">#4c000000</color>
+    <!--Widget colors  -->
+    <color name="colorControlNormal">#a1b5b2</color>
+    <color name="colorControlActivated">#4a4a4a</color>
+    <color name="colorControlHighlight">#000000</color>
+
+    <!--Normal and Night mode colors for window and main background-->
+    <color name="colorMainBackground">#d6e4e2</color>
+    <!--Normal and Night mode colors for item-->
+    <color name="colorItemBackground">#eff4f3</color>
+    <!--Normal and Night mode colors for dividers-->
+    <color name="colorDivider">#f0f0f0</color>
+
+    <!--Normal and Night mode text color for primary and secondary -->
+    <color name="colorTextPrimary">#3f474c</color>
+    <color name="colorTextSecondary">#a1b5b2</color>
+</resources>

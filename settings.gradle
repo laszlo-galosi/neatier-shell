@@ -1,0 +1,2 @@
+include ':neatier-app'/*, ':neatier-commons:neatier-commons'*/
+project(':neatier-app').projectDir = new File('app')
