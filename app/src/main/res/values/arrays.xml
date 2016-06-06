@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  Copyright (C) 2016 Delight Solutions Ltd., All Rights Reserved
+  ~  Unauthorized copying of this file, via any medium is strictly prohibited.
+  ~  Proprietary and confidential.
+  ~
+  ~  All information contained herein is, and remains the property of Delight Solutions Kft.
+  ~  The intellectual and technical concepts contained herein are proprietary to Delight Solutions Kft.
+  ~   and may be covered by U.S. and Foreign Patents, pending patents, and are protected
+  ~  by trade secret or copyright law. Dissemination of this information or reproduction of
+  ~  this material is strictly forbidden unless prior written permission is obtained from
+  ~   Delight Solutions Kft.
+  -->
+
+<resources>
+  <string-array name="event_types">
+    <item>@string/EVT_UNKNOWN</item>
+    <item>@string/EVT_NAVIGATE</item>
+    <item>@string/EVT_RENDER</item>
+    <item>@string/EVT_SHOW_HIDE</item>
+    <item>@string/EVT_DIALOG</item>
+    <item>@string/EVT_INTERNAL_ERROR</item>
+    <item>@string/EVT_MESSAGE</item>
+    <item>@string/EVT_CLICK</item>
+    <item>@string/EVT_LONGCLICK</item>
+    <item>@string/EVT_ITEM_ADDED</item>
+    <item>@string/EVT_ITEM_REMOVED</item>
+    <item>@string/EVT_ITEM_CHANGED</item>
+    <item>@string/EVT_PREF_CHANGED</item>
+  </string-array>
+
+  <string-array name="item_ids">
+    <item>@string/UNKNOWN_ITEM</item>
+    <item>@string/TOOLBAR</item>
+    <item>@string/SNACKBAR</item>
+    <item>@string/NAV_MENU_ITEM</item>
+    <item>@string/SELF</item>
+    <item>@string/SELF_CONTAINER</item>
+    <item>@string/DIALOG</item>
+  </string-array>
+
+  <string-array name="event_params">
+    <item>@string/PRM_VALUE</item>
+    <item>@string/PRM_ERROR</item>
+    <item>@string/PRM_ITEM_ID</item>
+    <item>@string/PRM_ITEM_POS</item>
+    <item>@string/PRM_ITEM_TEXT</item>
+    <item>@string/PRM_ITEM_DATE</item>
+    <item>@string/PRM_ITEM_TYPE</item>
+    <item>@string/PRM_ITEM_IMAGE</item>
+    <item>@string/PRM_ITEM_THUMBNAIL</item>
+    <item>@string/PRM_ITEM_COLOR</item>
+    <item>@string/PRM_ITEM_URL</item>
+    <item>@string/PRM_DETAILS</item>
+  </string-array>
+
+  <string name="EVT_UNKNOWN" translatable="false">Unknown</string>
+  <string name="EVT_NAVIGATE" translatable="false">Navigate</string>
+  <string name="EVT_RENDER" translatable="false">Render</string>
+  <string name="EVT_SHOW_HIDE" translatable="false">ShowHide</string>
+  <string name="EVT_DIALOG" translatable="false">Dialog</string>
+  <string name="EVT_INTERNAL_ERROR" translatable="false">InternalError</string>
+  <string name="EVT_MESSAGE" translatable="false">Message</string>
+  <string name="EVT_CLICK" translatable="false">Click</string>
+  <string name="EVT_LONGCLICK" translatable="false">LongClick</string>
+  <string name="EVT_ITEM_ADDED" translatable="false">ItemAdded</string>
+  <string name="EVT_ITEM_CHANGED" translatable="false">ItemChanged</string>
+  <string name="EVT_ITEM_REMOVED" translatable="false">ItemRemoved</string>
+  <string name="EVT_PREF_CHANGED" translatable="false">UserPrefsChannged</string>
+
+  <string name="UNKNOWN_ITEM" translatable="false">Unknown</string>
+  <string name="TOOLBAR" translatable="false">Toolbar</string>
+  <string name="SNACKBAR" translatable="false">Snackbar</string>
+  <string name="NAV_MENU_ITEM" translatable="false">NavMenuItem</string>
+  <string name="SELF" translatable="false">Self</string>
+  <string name="SELF_CONTAINER" translatable="false">SelfContainer</string>
+  <string name="SETTINGS" translatable="false">Settings</string>
+  <string name="DIALOG" translatable="false">Dialog</string>
+
+
+  <string name="PRM_VALUE" translatable="false">PrmValue</string>
+  <string name="PRM_ERROR" translatable="false">PrmError</string>
+  <string name="PRM_ITEM_ID" translatable="false">PrmItemId</string>
+  <string name="PRM_ITEM_POS" translatable="false">PrmItemPos</string>
+  <string name="PRM_ITEM_TEXT" translatable="false">PrmItemText</string>
+  <string name="PRM_ITEM_DATE" translatable="false">PrmItemDate</string>
+  <string name="PRM_ITEM_TYPE" translatable="false">PrmItemType</string>
+  <string name="PRM_ITEM_IMAGE" translatable="false">PrmItemImage</string>
+  <string name="PRM_ITEM_THUMBNAIL" translatable="false">PrmItemThumbNail</string>
+  <string name="PRM_ITEM_COLOR" translatable="false">PrmItemColor</string>
+  <string name="PRM_ITEM_URL" translatable="false">PrmItemUrl</string>
+  <string name="PRM_DETAILS" translatable="false">PrmDetails</string>
+</resources>

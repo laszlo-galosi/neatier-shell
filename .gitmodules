@@ -1,0 +1,3 @@
+[submodule "neatier-commons"]
+	path = neatier-commons
+	url = https://github.com/laszlo-galosi/neatier-commons.git

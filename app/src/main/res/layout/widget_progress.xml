@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  Copyright (C) 2016 Delight Solutions Ltd., All Rights Reserved
+  ~  Unauthorized copying of this file, via any medium is strictly prohibited.
+  ~  Proprietary and confidential.
+  ~
+  ~  All information contained herein is, and remains the property of Delight Solutions Kft.
+  ~  The intellectual and technical concepts contained herein are proprietary to Delight Solutions Kft.
+  ~   and may be covered by U.S. and Foreign Patents, pending patents, and are protected
+  ~  by trade secret or copyright law. Dissemination of this information or reproduction of
+  ~  this material is strictly forbidden unless prior written permission is obtained from
+  ~   Delight Solutions Kft.
+  -->
+
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pv_container"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center|center_vertical"
+    android:background="@drawable/background_main"
+>
+  <ProgressBar
+      android:id="@+id/pv_progress"
+      android:visibility="visible"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:indeterminate="true"
+      android:indeterminateTintMode="src_atop"
+      android:layout_gravity="center|center_vertical"
+      android:indeterminateTint="@color/colorAccent"
+      style="?android:attr/progressBarStyle"
+      android:duplicateParentState="true"
+  />
+</FrameLayout>

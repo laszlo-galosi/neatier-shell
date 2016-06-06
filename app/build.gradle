@@ -1,9 +1,9 @@
 repositories {
-    jcenter()
-    mavenCentral()
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots/'
-    }
+  jcenter()
+  mavenCentral()
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
 }
 
 apply plugin: 'com.android.application'
@@ -16,160 +16,167 @@ apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'me.tatarka.retrolambda'
 
 android {
-    compileSdkVersion versions.androidCompileSdkVersion
-    buildToolsVersion versions.androidBuildToolsVersion
+  compileSdkVersion versions.androidCompileSdkVersion
+  buildToolsVersion versions.androidBuildToolsVersion
 
-    defaultConfig {
-        minSdkVersion versions.androidMinSdkVersion
-        targetSdkVersion versions.androidTargetSdkVersion
+  defaultConfig {
+    minSdkVersion versions.androidMinSdkVersion
+    targetSdkVersion versions.androidTargetSdkVersion
 
-        applicationId versions.androidApplicationId
-        versionCode versions.code
-        versionName versions.name
-        testInstrumentationRunner versions.testInstrumentationRunner
-        testApplicationId versions.testApplicationId
+    applicationId versions.androidApplicationId
+    versionCode versions.code
+    versionName versions.name
+    testInstrumentationRunner versions.testInstrumentationRunner
+    testApplicationId versions.testApplicationId
 
-        //    multiDexEnabled true
+    //    multiDexEnabled true
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  signingConfigs {
+    debug {
+      storeFile file('../buildsystem/debug.keystore')
+      storePassword 'android'
+      keyAlias 'androiddebugkey'
+      keyPassword 'android'
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    //Todo: replace this with a valid CA keystore and key
+    release {
+      storeFile file('../buildsystem/debug.keystore')
+      storePassword 'android'
+      keyAlias 'androiddebugkey'
+      keyPassword 'android'
     }
+  }
 
-    signingConfigs {
-        debug {
-            storeFile file('../buildsystem/debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-        }
-
-        //Todo: replace this with a valid CA keystore and key
-        release {
-            storeFile file('../buildsystem/debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-        }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.release
     }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
-        debug {
-            //      minifyEnabled false
-            signingConfig signingConfigs.debug
-            applicationIdSuffix '.debug'
-        }
+    debug {
+      //      minifyEnabled false
+      signingConfig signingConfigs.debug
+      applicationIdSuffix '.debug'
     }
+  }
 
-    sourceSets {
-        // Unit tests live in src/unitTest.
-        test.java.srcDir 'src/unitTests/java'
+  sourceSets {
+    // Unit tests live in src/unitTest.
+    test.java.srcDir 'src/unitTests/java'
 
-        // Integration tests live in src/integrationTest.
-        test.java.srcDir 'src/integrationTests/java'
+    // Integration tests live in src/integrationTest.
+    test.java.srcDir 'src/integrationTests/java'
 
-        // Unit tests for debug build type specific code live in src/debugUnitTest.
-        testDebug.java.srcDir 'src/debugUnitTests/java'
+    // Unit tests for debug build type specific code live in src/debugUnitTest.
+    testDebug.java.srcDir 'src/debugUnitTests/java'
 
-        // Unit tests for release build type specific code live in src/releaseUnitTest.
-        testRelease.java.srcDir 'src/releaseUnitTests/java'
+    // Unit tests for release build type specific code live in src/releaseUnitTest.
+    testRelease.java.srcDir 'src/releaseUnitTests/java'
 
-        // Functional tests live in src/functionalTests.
-        androidTest.java.srcDir 'src/functionalTests/java'
+    // Functional tests live in src/functionalTests.
+    androidTest.java.srcDir 'src/functionalTests/java'
+  }
+
+  lintOptions {
+    quiet true
+    warningsAsErrors false
+    abortOnError false // Fail early.
+    ignoreWarnings false
+
+    disable 'InvalidPackage' // Okio references java.nio that does not presented in Android SDK.
+    disable 'OldTargetApi' //Lint gives this warning but SDK 20 would be Android L Beta.
+    disable 'IconDensities' //For testing purpose. This is safe to remove.
+    disable 'IconMissingDensityFolder' //For testing purpose. This is safe to remove.
+    disable 'GoogleAppIndexingWarning' // App does not have deep linking.
+  }
+
+  packagingOptions {
+    exclude 'LICENSE.txt'
+    exclude 'META-INF/DEPENDENCIES'
+    exclude 'META-INF/ASL2.0'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/services/javax.annotation.processing.Processor'
+    //becasue pf Espresso and Dagger compiler conflict
+    exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
+    exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
+  }
+
+  dexOptions {
+    incremental true
+    javaMaxHeapSize "4g"
+  }
+
+  retrolambda {
+    jvmArgs '-noverify'
+  }
+
+  // This allows us see tests execution progress in the output on the CI.
+  testOptions.unitTests.all {
+    testLogging {
+      events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+      exceptionFormat 'full'
     }
-
-    lintOptions {
-        quiet true
-        warningsAsErrors false
-        abortOnError false // Fail early.
-        ignoreWarnings false
-
-        disable 'InvalidPackage' // Okio references java.nio that does not presented in Android SDK.
-        disable 'OldTargetApi' //Lint gives this warning but SDK 20 would be Android L Beta.
-        disable 'IconDensities' //For testing purpose. This is safe to remove.
-        disable 'IconMissingDensityFolder' //For testing purpose. This is safe to remove.
-        disable 'GoogleAppIndexingWarning' // App does not have deep linking.
-    }
-
-    packagingOptions {
-        exclude 'LICENSE.txt'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/ASL2.0'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/services/javax.annotation.processing.Processor'
-        //becasue pf Espresso and Dagger compiler conflict
-        exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
-        exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
-    }
-
-    dexOptions {
-        incremental true
-        javaMaxHeapSize "4g"
-    }
-
-    retrolambda {
-        jvmArgs '-noverify'
-    }
-
-    // This allows us see tests execution progress in the output on the CI.
-    testOptions.unitTests.all {
-        testLogging {
-            events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
-            exceptionFormat 'full'
-        }
-    }
+  }
 }
 
 dependencies {
-//    compile project(':commons')
-//    compile project(':neatier-commons:neatier-commons')
+  //======= Internal dependencies
+  compile fileTree(dir: 'libs', include: ['*.jar'])
+  compile project(':neatier-commons:commons')
+  compile project(':neatier-commons:widgets')
 
-//    Optional, Collections, Guava like but lightweight on method count library
+  //    Optional, Collections, Guava like but lightweight on method count library
 
-//=======    dependency Injection Dagger 2 related
-    apt appBuildingDependencies.daggerCompiler
-    compile appBuildingDependencies.dagger
-    compile appBuildingDependencies.javaxInject
-//    compile appBuildingDependencies.javaxAnnotationApi
+  //=======    dependency Injection Dagger 2 related
+  apt appBuildingDependencies.daggerCompiler
+  compile appBuildingDependencies.dagger
+  compile appBuildingDependencies.javaxInject
+  //    compile appBuildingDependencies.javaxAnnotationApi
 
-//========    RxJava related libraries
-    compile appBuildingDependencies.rxJava
-    compile appBuildingDependencies.rxLint
-    compile appBuildingDependencies.rxAndroid
+  //========    RxJava related libraries
+  compile appBuildingDependencies.rxJava
+  //  compile appBuildingDependencies.rxLint
+  compile appBuildingDependencies.rxAndroid
 
-//=======    android support libraries, uncomment this if needed.
-    compile appBuildingDependencies.supportV7
-    compile appBuildingDependencies.supportV4
-    compile appBuildingDependencies.supportDesign
-//  compile appBuildingDependencies.supportPercent
-//  compile appBuildingDependencies.supportPreference
-    compile appBuildingDependencies.butterKnife
-    apt appBuildingDependencies.butterKnifeCompiler
+  //=======    android support libraries, uncomment this if needed.
+  compile appBuildingDependencies.supportV7
+  compile appBuildingDependencies.supportV4
+  compile appBuildingDependencies.supportDesign
+  //  compile appBuildingDependencies.supportPercent
+  //  compile appBuildingDependencies.supportPreference
+  compile appBuildingDependencies.butterKnife
+  apt appBuildingDependencies.butterKnifeCompiler
 
-//=======    libraries on demand per project
-    compile appBuildingDependencies.trikitaLog
-    compile appBuildingDependencies.arrow
-    compile appBuildingDependencies.recyclerView
-//  compile appBuildingDependencies.jodaTimeAndroid
-//    compile appBuildingDependencies.picasso
-    compile appBuildingDependencies.calligraphy
+  //=======    libraries on demand per project
+  compile appBuildingDependencies.trikitaLog
+  compile appBuildingDependencies.arrow
+  compile appBuildingDependencies.recyclerView
+  //  compile appBuildingDependencies.jodaTimeAndroid
+  //    compile appBuildingDependencies.picasso
+  compile appBuildingDependencies.calligraphy
 
-    //QA and dev related dependencies
-    debugCompile appBuildingDependencies.leakcanary_debug
-    releaseCompile appBuildingDependencies.leakcanary_release
+  //Networking
+  //  compile dataDependencies.gson
+  //  compile dataDependencies.okHttp
+  compile dataDependencies.retrofit
 
-//=======    Unit testing
-//    testCompile unitTestDependencies.junit
-//    testCompile robolectricTestDependencies.junit
-//    testCompile robolectricTestDependencies.assertj
-//    testCompile robolectricTestDependencies.mockito
-//    testCompile robolectricTestDependencies.robolectric
-//    testCompile unitTestDependencies.leakcanary_test
+  //QA and dev related dependencies
+  debugCompile appBuildingDependencies.leakcanary_debug
+  releaseCompile appBuildingDependencies.leakcanary_release
+
+  //=======    Unit testing
+  //    testCompile unitTestDependencies.junit
+  //    testCompile robolectricTestDependencies.junit
+  //    testCompile robolectricTestDependencies.assertj
+  //    testCompile robolectricTestDependencies.mockito
+  //    testCompile robolectricTestDependencies.robolectric
+  //    testCompile unitTestDependencies.leakcanary_test
 }
