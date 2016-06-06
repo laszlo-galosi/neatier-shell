@@ -110,13 +110,6 @@ public class NavigationMenuItemAdapter<T extends MenuItem>
                   new ItemWidget(itemLayout, getItemHeight(), mContext)
                         .setContentClickable(true);
             itemWidget.initView(mContext);
-            //itemWidget.setOnClickListener(mNavItemItemClickListener);
-            boolean clickable = itemWidget.isClickable();
-           /* if (Build.VERSION.SDK_INT >= M && clickable) {
-                itemWidget.setForeground(ContextCompat.getDrawable(mContext,
-                                                                   android.R.drawable
-                                                                         .list_selector_background));
-            }*/
             return new MenuItemViewHolder(itemWidget, mContext);
         }
     }

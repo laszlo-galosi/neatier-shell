@@ -12,23 +12,15 @@
  *   Delight Solutions Kft.
  */
 
-package com.neatier.shell.internal.di;
+package com.neatier.shell.home;
 
-import com.neatier.shell.home.di.HomeComponent;
-import com.neatier.shell.home.di.HomeModule;
-import com.neatier.shell.navigation.NavigationMenuPresenter;
-import dagger.Component;
+import com.neatier.shell.appframework.AppMvp;
+import com.neatier.shell.eventbus.EventBuilder;
+import java.util.List;
 
 /**
- * Created by László Gálosi on 17/08/15
+ * Created by László Gálosi on 14/04/16
  */
-@PerActivity
-@Component(dependencies = ApplicationComponent.class, modules = {
-      ActivityModule.class,
-      MainModule.class,
-})
-public interface MainComponent extends ActivityComponent {
-    NavigationMenuPresenter navigationMenuPresenter();
-
-    HomeComponent plus(HomeModule homeModule);
+public interface HomePresenter extends AppMvp.Presenter {
+    List<EventBuilder> getItems();
 }

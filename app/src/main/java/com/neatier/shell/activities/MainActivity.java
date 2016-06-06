@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.fernandocejas.arrow.optional.Optional;
 import com.neatier.commons.helpers.BundleWrapper;
 import com.neatier.commons.helpers.KeyValuePairs;
 import com.neatier.commons.helpers.LongTaskOnIOScheduler;
@@ -44,11 +45,13 @@ import com.neatier.shell.R;
 import com.neatier.shell.appframework.AppMvp;
 import com.neatier.shell.appframework.MultiFragmentActivity;
 import com.neatier.shell.appframework.Navigator;
+import com.neatier.shell.appframework.TaggedBaseFragment;
 import com.neatier.shell.appframework.helpers.DialogMaker;
 import com.neatier.shell.eventbus.EventBuilder;
 import com.neatier.shell.eventbus.EventParam;
 import com.neatier.shell.eventbus.Item;
 import com.neatier.shell.exception.ErrorMessageFactory;
+import com.neatier.shell.home.HomeFragment;
 import com.neatier.shell.internal.di.DaggerMainComponent;
 import com.neatier.shell.internal.di.HasComponent;
 import com.neatier.shell.internal.di.MainComponent;
@@ -124,7 +127,7 @@ public class MainActivity extends MultiFragmentActivity implements
 
         //if no saved state storing the default fragment tag, and initializing the activity.
         if (savedInstanceState == null) {
-            //mCurrentFragmentTag = HomeFragment.TAG;
+            mCurrentFragmentTag = HomeFragment.TAG;
             onRestoreInstanceState(mMainBundle.getBundle());
         }
     }
@@ -254,6 +257,7 @@ public class MainActivity extends MultiFragmentActivity implements
             int itemId = event.getParamAs(EventParam.PRM_ITEM_ID, Integer.class, 0).get();
             switch (itemId) {
                 case R.id.action_home:
+                    super.addOrReplaceFragment(null, HomeFragment.newInstance(getMetaData()));
                     break;
                 case R.id.action_settings:
                     break;
@@ -306,6 +310,11 @@ public class MainActivity extends MultiFragmentActivity implements
     @Override
     public MainComponent getComponent() {
         return mainComponent;
+    }
+
+    @Override protected <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
+          final BundleWrapper instanceBundleWrapper) {
+        return Optional.of((T) HomeFragment.newInstance(instanceBundleWrapper));
     }
 
     public void setOnGestureListener(final GestureDetector.OnGestureListener gl) {

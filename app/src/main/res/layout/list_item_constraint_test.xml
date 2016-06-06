@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  Copyright (C) 2016 Delight Solutions Ltd., All Rights Reserved
+  ~  Unauthorized copying of this file, via any medium is strictly prohibited.
+  ~  Proprietary and confidential.
+  ~
+  ~  All information contained herein is, and remains the property of Delight Solutions Kft.
+  ~  The intellectual and technical concepts contained herein are proprietary to Delight Solutions Kft.
+  ~   and may be covered by U.S. and Foreign Patents, pending patents, and are protected
+  ~  by trade secret or copyright law. Dissemination of this information or reproduction of
+  ~  this material is strictly forbidden unless prior written permission is obtained from
+  ~   Delight Solutions Kft.
+  -->
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_item"
+    android:orientation="horizontal"
+    android:id="@+id/constraintLayout2">
+
+  <ImageView
+      android:id="@+id/itemImage"
+      android:layout_height="56dp"
+      android:layout_width="56dp"
+      android:scaleType="fitStart"
+      android:src="@drawable/img_placeholder"
+      android:background="@color/colorPrimary"
+      tools:ignore="ContentDescription"
+      tools:layout_editor_absoluteWidth="56dp" tools:layout_editor_absoluteHeight="56dp"
+      app:layout_constraintLeft_toLeftOf="@+id/constraintLayout2" android:layout_marginLeft="16dp"
+      android:layout_marginStart="16dp" app:layout_constraintTop_toTopOf="@+id/constraintLayout2"
+      app:layout_constraintBottom_toBottomOf="@+id/constraintLayout2"/>
+
+  <TextView
+      android:id="@+id/itemText"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:maxLines="2"
+      android:ellipsize="end"
+      tools:text="@string/lorem_ipsum"
+      android:textAppearance="@style/AppTextView.normal"
+      android:textColor="@color/colorTextPrimary"
+      tools:layout_editor_absoluteWidth="280dp" tools:layout_editor_absoluteHeight="38dp"
+      app:layout_constraintTop_toTopOf="@+id/constraintLayout2"
+      app:layout_constraintRight_toRightOf="@+id/constraintLayout2"
+      android:layout_marginRight="16dp" android:layout_marginEnd="16dp"
+      app:layout_constraintBottom_toBottomOf="@+id/constraintLayout2"/>
+</android.support.constraint.ConstraintLayout>

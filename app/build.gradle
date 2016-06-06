@@ -110,7 +110,6 @@ android {
   }
 
   dexOptions {
-    incremental true
     javaMaxHeapSize "4g"
   }
 
@@ -160,7 +159,7 @@ dependencies {
   compile appBuildingDependencies.arrow
   compile appBuildingDependencies.recyclerView
   //  compile appBuildingDependencies.jodaTimeAndroid
-  //    compile appBuildingDependencies.picasso
+  compile appBuildingDependencies.picasso
   compile appBuildingDependencies.calligraphy
 
   //Networking

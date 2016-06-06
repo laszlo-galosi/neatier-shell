@@ -530,7 +530,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     /**
      * Returns the starter fragment of the {@link MultiFragmentActivity}
      */
-    public <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
+    protected <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
           final BundleWrapper instanceBundleWrapper) {
         return Optional.absent();
     }
