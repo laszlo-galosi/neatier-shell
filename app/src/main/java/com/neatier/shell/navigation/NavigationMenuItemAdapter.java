@@ -19,11 +19,10 @@ package com.neatier.shell.navigation;
  */
 
 import android.content.Context;
-import android.os.Build;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -43,62 +42,89 @@ import com.neatier.shell.eventbus.EventParam;
 import com.neatier.shell.eventbus.Item;
 import com.neatier.widgets.Bindable;
 import com.neatier.widgets.recyclerview.ItemViewHolderBase;
+import com.neatier.widgets.recyclerview.ItemWidget;
 import com.neatier.widgets.recyclerview.ItemWidgetAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import rx.Observable;
 import rx.functions.Action1;
 
-public class NavigationMenuItemAdapter
-      extends ItemWidgetAdapter<MenuItem> {
+public class NavigationMenuItemAdapter<T extends MenuItem>
+      extends ItemWidgetAdapter<T> {
 
     private @LayoutRes int mHeaderLayout = 0;
 
+    private View.OnClickListener mNavItemItemClickListener =
+          (v) -> EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
+                             .addParam(EventParam.PRM_ITEM_ID, v.getId())
+                             .send();
+
     public NavigationMenuItemAdapter(final Context context,
-          @Nullable final List<MenuItem> dataSet) {
-        super(context, R.layout.listitem_nav_menu, 10, dataSet);
+          @Nullable final List<T> dataSet) {
+        this(context, R.layout.list_item_icontext, 48, dataSet);
+    }
+
+    public NavigationMenuItemAdapter(final Context context,
+          @LayoutRes int itemLayout,
+          int itemHeight,
+          @Nullable final List<T> dataSet) {
+        super(context, itemLayout, itemHeight, dataSet);
     }
 
     public NavigationMenuItemAdapter(final Context context, final @MenuRes int menuResId) {
-        super(context, 10);
+        this(context, menuResId, R.layout.list_item_icontext, 48);
+    }
+
+    public NavigationMenuItemAdapter(final Context context,
+          final @MenuRes int menuResId,
+          @LayoutRes int itemLayout,
+          int itemHeight) {
+        super(context, itemLayout, itemHeight, null);
         Menu menu = new MenuBuilder(context);
         MenuInflater mi = new MenuInflater(context);
         mi.inflate(menuResId, menu);
         mDataset = new ArrayList<>(16);
         for (int i = 0; i < menu.size(); i++) {
             MenuItem subitem = menu.getItem(i);
-            mDataset.add(subitem);
+            mDataset.add((T) subitem);
             if (subitem.hasSubMenu()) {
                 for (int j = 0, lenj = subitem.getSubMenu().size(); j < lenj; j++) {
                     MenuItem item = subitem.getSubMenu().getItem(j);
-                    mDataset.add(item);
+                    mDataset.add((T) item);
                 }
             }
         }
     }
 
-    @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
           int viewType) {
-        mItemLayout = getItemLayout(viewType);
-        View itemWidget =
-              LayoutInflater.from(mContext).inflate(mItemLayout, parent, false);
-        if (viewType == R.layout.widget_nav_header) {
-            return new MenuHeaderViewHolder(itemWidget, mContext);
+        @LayoutRes int itemLayout = getItemLayout(viewType);
+        if (viewType == mHeaderLayout) {
+            View headerView =
+                  LayoutInflater.from(mContext).inflate(itemLayout, parent, false);
+
+            return new MenuHeaderViewHolder(headerView, mContext);
         } else {
-            boolean clickable = viewType == R.layout.listitem_nav_menu;
-            itemWidget.setClickable(clickable);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && clickable) {
+            ItemWidget itemWidget =
+                  new ItemWidget(itemLayout, getItemHeight(), mContext)
+                        .setContentClickable(true);
+            itemWidget.initView(mContext);
+            //itemWidget.setOnClickListener(mNavItemItemClickListener);
+            boolean clickable = itemWidget.isClickable();
+           /* if (Build.VERSION.SDK_INT >= M && clickable) {
                 itemWidget.setForeground(ContextCompat.getDrawable(mContext,
                                                                    android.R.drawable
                                                                          .list_selector_background));
-            }
+            }*/
             return new MenuItemViewHolder(itemWidget, mContext);
         }
     }
 
-    @Override public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         final int viewType = getItemViewType(position);
-        if (viewType == R.layout.widget_nav_header) {
+        if (viewType == mHeaderLayout) {
             ((Bindable) holder).bind(getHeaderData());
         } else {
             Optional<MenuItem> item = getItem(position);
@@ -112,29 +138,43 @@ public class NavigationMenuItemAdapter
         return Optional.fromNullable(mDataset.get(getOffsetPosition(position)));
     }
 
-    @Override public long getItemId(int position) {
+    @Override
+    public long getItemId(int position) {
         final int viewType = getItemViewType(position);
-        if (viewType != R.layout.widget_nav_header) {
+        if (viewType != mHeaderLayout) {
             return getItem(position).get().getItemId();
         }
         return RecyclerView.NO_ID;
     }
 
-    @Override public @LayoutRes int getItemLayout(int viewType) {
+    @Override
+    public
+    @LayoutRes
+    int getItemLayout(int viewType) {
         return viewType;
     }
 
-    @Override public int getItemViewType(final int position) {
+    @Override
+    public int getItemViewType(final int position) {
         if (position == 0 && hasHeader()) {
-            return R.layout.widget_nav_header;
+            return mHeaderLayout;
         }
         Optional<MenuItem> item = getItem(position);
         if (item.isPresent()) {
-            return R.layout.listitem_nav_menu;
+            /*Preconditions.checkArgument(
+                  mItemLayout > 0,
+                  String.format("Invalid item layout resource:%d", mItemLayout)
+            );*/
+            return mItemLayout;
         }
         throw new IllegalStateException(
               String.format("Invalid view type for postion: %d, item: %s", position,
                             getItem(position)));
+    }
+
+    @Override public int getItemCount() {
+        int dataSize = mDataset != null ? mDataset.size() : 0;
+        return dataSize + (hasHeader() ? 1 : 0);
     }
 
     public NavigationMenuItemAdapter withHeader(final @LayoutRes int headerLayout) {
@@ -163,10 +203,14 @@ public class NavigationMenuItemAdapter
             ButterKnife.bind(this, itemView);
         }
 
-        @Override public void bind(final Object dataItem) {
+        @Override
+        public void bind(final Object dataItem) {
             super.bind(dataItem);
             MenuItem menuItem = (MenuItem) dataItem;
             mItemTextView.setText(menuItem.getTitle());
+            Drawable[] drawables = mItemTextView.getCompoundDrawables();
+            mItemTextView.setCompoundDrawablesWithIntrinsicBounds(menuItem.getIcon(), null, null,
+                                                                  null);
             if (mItemTextView.isClickable()) {
                 mItemTextView.setOnClickListener(
                       v -> EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
@@ -183,10 +227,12 @@ public class NavigationMenuItemAdapter
             super(itemView, context);
         }
 
-        @Override public void bind(final Object dataItem) {
+        @Override
+        public void bind(final Object dataItem) {
             if (dataItem instanceof Observable) {
                 ((Observable<?>) dataItem).subscribe(new Action1<Object>() {
-                    @Override public void call(final Object o) {
+                    @Override
+                    public void call(final Object o) {
                         EventBuilder event = (EventBuilder) o;
                         int itemId =
                               event.getParamAs(EventParam.PRM_ITEM_ID, Integer.class).or(0);
@@ -195,11 +241,10 @@ public class NavigationMenuItemAdapter
                         if (renderableView.isPresent()) {
                             View view = renderableView.get();
                             if (view.isClickable()) {
-                                view.setOnClickListener(
-                                      v -> event.withItemAndType(Item.NAV_MENU_ITEM,
-                                                                 Event.EVT_NAVIGATE)
-                                                .addParam(EventParam.PRM_ITEM_ID, view.getId())
-                                                .send()
+                                view.setOnClickListener(v -> event
+                                      .withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
+                                      .addParam(EventParam.PRM_ITEM_ID, v.getId())
+                                      .send()
                                 );
                             }
                         }

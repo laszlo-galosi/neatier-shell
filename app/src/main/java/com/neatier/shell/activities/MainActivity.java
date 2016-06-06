@@ -56,7 +56,6 @@ import com.neatier.shell.internal.di.MainModule;
 import com.neatier.shell.navigation.NavigationMenuItemAdapter;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
 import javax.inject.Inject;
-import rx.Observable;
 import trikita.log.Log;
 
 public class MainActivity extends MultiFragmentActivity implements
@@ -293,12 +292,11 @@ public class MainActivity extends MultiFragmentActivity implements
         //itemClick.setOnItemClickListener(this);
         if (mNavMenuAdapter == null) {
             mNavMenuAdapter =
-                  new NavigationMenuItemAdapter(this, mNavigationMenuPresenter.getMenuItems()) {
-                      @Override
-                      public Observable<?> getHeaderData() {
-                          return Observable.empty();
-                      }
-                  }.withHeader(R.layout.widget_nav_header);
+                  new NavigationMenuItemAdapter(
+                        this,
+                        R.layout.list_item_navmenu, 48,
+                        mNavigationMenuPresenter.getMenuItems()
+                  ).withHeader(R.layout.widget_nav_header);
         }
         mNavMenuRecyclerView.setAdapter(mNavMenuAdapter);
         mNavMenuRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -322,7 +320,8 @@ public class MainActivity extends MultiFragmentActivity implements
         return mGestureDetector;
     }
 
-    @Override public boolean dispatchTouchEvent(final MotionEvent motionEvent) {
+    @Override
+    public boolean dispatchTouchEvent(final MotionEvent motionEvent) {
         boolean defaultResult = super.dispatchTouchEvent(motionEvent);
         if (mGestureDetector != null) {
             return mGestureDetector.onTouchEvent(motionEvent);

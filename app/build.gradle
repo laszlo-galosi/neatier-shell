@@ -173,7 +173,7 @@ dependencies {
   releaseCompile appBuildingDependencies.leakcanary_release
 
   //=======    Unit testing
-  //    testCompile unitTestDependencies.junit
+  testCompile unitTestDependencies.junit
   //    testCompile robolectricTestDependencies.junit
   //    testCompile robolectricTestDependencies.assertj
   //    testCompile robolectricTestDependencies.mockito

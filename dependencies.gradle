@@ -31,7 +31,7 @@ ext.versions = [//Android framework
                 androidCompileSdkVersion     : 23,
                 multidexVersion              : '1.0.1',
 
-                androidGradlePlugin          : '2.1.0',
+                androidGradlePlugin          : '2.2.0-alpha2',
                 aptGradlePlugin              : '1.8',
                 paperworkGradlePlugin        : '1.2.7',
                 retrolambdaGradlePlugin      : '3.2.5',

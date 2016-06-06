@@ -22,4 +22,6 @@
     android:paddingLeft="@dimen/material_padding"
     android:paddingRight="@dimen/material_padding"
     android:drawablePadding="32dp"
-    style="@style/AppTextView.helper" />
+    style="@style/AppTextView.normal"
+    android:clickable="true"
+/>
