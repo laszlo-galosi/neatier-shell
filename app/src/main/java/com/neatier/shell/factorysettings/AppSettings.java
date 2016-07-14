@@ -21,9 +21,15 @@ import android.content.Context;
  */
 public class AppSettings {
 
+    public static final String PACKAGE_NAME = "com.delightsolutions.hirtv";
+
     public static final int PENDING_CALL_REQUEST_CODE = 1 >> 1;
     public static final String PREFKEY_PERMISION_DENIED_COUNT = "MaxPermissionDenied";
     public static final int MAX_PERMISSION_DENIED_LIMIT = 1;
+
+    public static final String PREF_DEFAULT_STORAGE_FILE = PACKAGE_NAME + "NeatierShell";
+    public static final String PREF_DEV_SETTINGS_FILE = PACKAGE_NAME + "NeatierShell.DevSettings";
+
 
     public static final int TOOLBAR_TAP_EVENT_TRESHOLD = 3;
     public static final int TOOLBAR_TAP_EVENT_INTERVAL = 500;

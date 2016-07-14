@@ -18,9 +18,9 @@ import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import com.neatier.commons.helpers.SharedKeyValueStore;
-import com.neatier.commons.settings.FactorySettings;
 import com.neatier.shell.appframework.Navigator;
 import com.neatier.shell.appframework.helpers.DialogMaker;
+import com.neatier.shell.factorysettings.AppSettings;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
@@ -61,6 +61,6 @@ public class ApplicationModule {
     @Provides
     @Singleton
     protected SharedKeyValueStore<String, Object> provideSharedKeyValueStore(Context context) {
-        return new SharedKeyValueStore<>(context, FactorySettings.PREF_DEFAULT_STORAGE_FILE);
+        return new SharedKeyValueStore<>(context, AppSettings.PREF_DEFAULT_STORAGE_FILE);
     }
 }

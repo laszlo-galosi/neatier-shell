@@ -17,7 +17,7 @@ package com.neatier.shell.internal.di;
 import android.app.Application;
 import android.support.annotation.NonNull;
 import com.neatier.commons.helpers.SharedKeyValueStore;
-import com.neatier.commons.settings.FactorySettings;
+import com.neatier.shell.factorysettings.AppSettings;
 import com.neatier.shell.factorysettings.developer.DeveloperSettings;
 import com.neatier.shell.factorysettings.developer.DeveloperSettingsModel;
 import com.neatier.shell.factorysettings.developer.DeveloperSettingsModelImpl;
@@ -43,7 +43,7 @@ public class DeveloperSettingsModule {
     public DeveloperSettings provideDeveloperSettings(@NonNull Application application) {
         return new DeveloperSettings(
               new SharedKeyValueStore<>(application.getApplicationContext(),
-                                        FactorySettings.PREF_DEV_SETTINGS_FILE));
+                                        AppSettings.PREF_DEV_SETTINGS_FILE));
     }
 
     @Provides

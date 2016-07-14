@@ -29,7 +29,6 @@ allprojects {
         androidVersionName = "1.0"
         testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
         testApplicationId = 'com.neatier.shell.test'
-        print androidHome
     }
     configurations.all {
         resolutionStrategy.force 'com.android.support:support-annotations:23.3.0'
@@ -48,7 +47,6 @@ allprojects {
         }
     }
 }
-
 
 task clean(type: Delete) {
     delete rootProject.buildDir

@@ -178,4 +178,6 @@ dependencies {
   //    testCompile robolectricTestDependencies.mockito
   //    testCompile robolectricTestDependencies.robolectric
   //    testCompile unitTestDependencies.leakcanary_test
+  androidTestCompile uiTestDependencies.espresso
+  androidTestCompile uiTestDependencies.testingSupportRunner
 }
