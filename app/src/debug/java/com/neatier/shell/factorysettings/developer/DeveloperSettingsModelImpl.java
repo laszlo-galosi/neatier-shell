@@ -16,8 +16,11 @@ package com.neatier.shell.factorysettings.developer;
 
 import android.app.Application;
 import android.support.annotation.NonNull;
+import com.crashlytics.android.Crashlytics;
 import com.neatier.shell.BuildConfig;
+import io.fabric.sdk.android.Fabric;
 import java.util.concurrent.atomic.AtomicBoolean;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * Created by László Gálosi on 04/05/16
@@ -69,13 +72,36 @@ public class DeveloperSettingsModelImpl implements DeveloperSettingsModel {
         apply();
     }
 
-    public boolean isTinyDancerEnabled() {
-        return developerSettings.isTinyDancerEnabled();
+    public boolean isPicassoIndicatorEnabled() {
+        return developerSettings.isPicassoIndicatorEnabled();
     }
 
-    public void changeTinyDancerState(boolean enabled) {
-        developerSettings.saveIsTinyDancerEnabled(enabled);
-        apply();
+    public void changePicassoIndicatorState(boolean enabled) {
+        developerSettings.savePicassoIndicatorEnabled(enabled);
+    }
+
+    public boolean isCrashlyticsEnabled() {
+        return developerSettings.isCrashlyticsEnabled();
+    }
+
+    public void changeCrashlyticsState(boolean enabled) {
+        developerSettings.saveIsCrashlyticsEnabled(enabled);
+    }
+
+    public void changeisAutoFillTestValuesEnabled(boolean enabled) {
+        developerSettings.saveAutoFillTestValuesEnabled(enabled);
+    }
+
+    public void changePicassoLoggingEnabled(boolean enabled) {
+        developerSettings.savePicassoLoggingEnabled(enabled);
+    }
+
+    public void changeHttpLoggingLevel(HttpLoggingInterceptor.Level level) {
+        developerSettings.saveHttpLoggingLevel(level);
+    }
+
+    public void changeCrashOnRxLogEnabled(boolean enabled) {
+        developerSettings.saveCrashOnRxLogEnabled(enabled);
     }
 
     @Override
@@ -88,5 +114,18 @@ public class DeveloperSettingsModelImpl implements DeveloperSettingsModel {
                 leakCanaryProxy.init();
             }
         }
+        changeCrashlyticsState(false);
+        if (isCrashlyticsEnabled()) {
+            Fabric.with(application, new Crashlytics());
+        }
+        //Enables showing Picasso indicators of loaded image (network/disk/memory)
+        changePicassoIndicatorState(true);
+        //Enables Picasso logging of loading images.
+        changePicassoLoggingEnabled(false);
+        changeisAutoFillTestValuesEnabled(false);
+        //Set whether RxLogger.logRxError call causes crashes the app or only logs to the err.
+        changeCrashOnRxLogEnabled(false);
+        //Change the HttpLogging level of RetroFit.
+        changeHttpLoggingLevel(HttpLoggingInterceptor.Level.BODY);
     }
 }

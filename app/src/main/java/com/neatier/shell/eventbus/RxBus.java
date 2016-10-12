@@ -42,7 +42,7 @@ public class RxBus {
     }
 
     public RxBus send(EventBuilder event) {
-        event.logMe("RxBus", "Sending event").v(event);
+        event.logMe("[RxBus]", "-->", "Sending event").v(event);
         mBus.onNext(event);
         return this;
     }
@@ -51,6 +51,7 @@ public class RxBus {
         return send(EventBuilder.withItemAndType(itemId, eventType));
     }
 
+    //@RxLogObservable
     public Observable<EventBuilder> toObservable() {
         return mBus;
     }
@@ -59,6 +60,7 @@ public class RxBus {
         return mBus.hasObservers();
     }
 
+    //@RxLogObservable
     public Observable<EventBuilder> toObservable(
           @Nullable Func1<EventBuilder, Boolean> filterFunction) {
         return mBus.filter(filterFunction);

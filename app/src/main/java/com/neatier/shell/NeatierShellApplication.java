@@ -17,12 +17,19 @@ package com.neatier.shell;
 import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.neatier.shell.data.network.ApiSettings;
+import com.neatier.shell.data.network.di.HttpInterceptorModule;
+import com.neatier.shell.data.network.di.HttpNetworkModule;
+import com.neatier.shell.data.network.di.RestApiModule;
 import com.neatier.shell.eventbus.RxBus;
+import com.neatier.shell.exception.RxLogger;
+import com.neatier.shell.factorysettings.AppSettings;
 import com.neatier.shell.factorysettings.developer.DeveloperSettingsModel;
 import com.neatier.shell.internal.di.ApplicationComponent;
 import com.neatier.shell.internal.di.ApplicationModule;
 import com.neatier.shell.internal.di.DaggerApplicationComponent;
 import com.neatier.shell.internal.di.HasComponent;
+import com.squareup.leakcanary.LeakCanary;
 import dagger.Lazy;
 import javax.inject.Inject;
 import net.danlew.android.joda.JodaTimeAndroid;
@@ -46,7 +53,9 @@ public class NeatierShellApplication extends Application
     public void onCreate() {
         super.onCreate();
 
-        //MultiDex.install(this);
+/*        if (!isInUnitTests()) {
+            MultiDex.install(this);
+        }*/
 
         applicationComponent = DaggerApplicationComponent.builder()
                                                          .applicationModule(
@@ -56,8 +65,9 @@ public class NeatierShellApplication extends Application
         //Initialize RxBus event constants.
         RxBus.initConstants(this);
         //Initialize Enum-like factory settings constant classes.
-        //AppSettings.init(this);
+        AppSettings.init(this);
 
+        RxLogger.setCrashOnCall(getComponent().developerSettings().isCrashOnRxLogEnabled());
         //Initialize calligraphy.
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
                                             .setDefaultFontPath("fonts/Roboto-Light.ttf")
@@ -66,15 +76,33 @@ public class NeatierShellApplication extends Application
         Log.useFormat(true);
         JodaTimeAndroid.init(this);
 
-        if (BuildConfig.DEBUG) {
-            //apply debug specific initialization
-            developerSettingModel.get().apply();
-        }
+        //apply debug specific initialization
+        developerSettingModel.get().apply();
+    }
+
+    @NonNull
+    protected DaggerApplicationComponent.Builder prepareApplicationComponent() {
+        return DaggerApplicationComponent.builder()
+                                         .applicationModule(new ApplicationModule(this))
+                                         .restApiModule(
+                                               new RestApiModule(
+                                                     ApiSettings.DEFAULT_SERVER_ENDPOINT)
+                                         )
+                                         .httpNetworkModule(new HttpNetworkModule())
+                                         .httpInterceptorModule(new HttpInterceptorModule());
     }
 
     @Override
     @NonNull
     public ApplicationComponent getComponent() {
         return applicationComponent;
+    }
+
+    /**
+     * @Return if the app is under unit test. {@link LeakCanary} doesn't install.
+     * Override in unit test Application stub.
+     */
+    protected boolean isInUnitTests() {
+        return false;
     }
 }
