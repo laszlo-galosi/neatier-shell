@@ -14,9 +14,15 @@
 
 package com.neatier.shell.internal.di;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import com.neatier.commons.helpers.SharedKeyValueStore;
 import com.neatier.shell.NeatierShellApplication;
 import com.neatier.shell.appframework.MultiFragmentActivity;
+import com.neatier.shell.data.network.di.HttpInterceptorModule;
+import com.neatier.shell.data.network.di.HttpNetworkModule;
+import com.neatier.shell.data.network.di.RestApiModule;
+import com.neatier.shell.factorysettings.developer.DeveloperSettings;
 import dagger.Component;
 import javax.inject.Singleton;
 
@@ -24,6 +30,9 @@ import javax.inject.Singleton;
 @Component(modules = {
       ApplicationModule.class,
       DeveloperSettingsModule.class,
+      HttpNetworkModule.class,
+      HttpInterceptorModule.class,
+      RestApiModule.class
 })
 public interface ApplicationComponent {
 
@@ -35,4 +44,10 @@ public interface ApplicationComponent {
     void inject(@NonNull MultiFragmentActivity activity);
 
     @NonNull DeveloperSettingsComponent plusDeveloperSettingsComponent();
+
+    @NonNull Context context();
+
+    @NonNull DeveloperSettings developerSettings();
+
+    SharedKeyValueStore<String, Object> settingsStore();
 }

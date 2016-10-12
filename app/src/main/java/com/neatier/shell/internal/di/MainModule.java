@@ -14,12 +14,17 @@
 
 package com.neatier.shell.internal.di;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
 import com.neatier.commons.helpers.KeyValuePairs;
 import com.neatier.commons.helpers.LongTaskScheduler;
+import com.neatier.shell.factorysettings.developer.DeveloperSettings;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
 import com.neatier.shell.navigation.XmlNavigationMenuPresenterImpl;
+import com.squareup.picasso.Picasso;
 import dagger.Module;
 import dagger.Provides;
+import trikita.log.Log;
 
 /**
  * Created by László Gálosi on 18/05/16
@@ -41,5 +46,14 @@ public class MainModule {
 
     @Provides @PerActivity protected NavigationMenuPresenter provideNavigationMenuPresenter() {
         return new XmlNavigationMenuPresenterImpl();
+    }
+
+    @Provides @NonNull @PerActivity
+    public Picasso providePicasso(Context context, final DeveloperSettings developerSettingsModel) {
+        return new Picasso.Builder(context)
+              .indicatorsEnabled(developerSettingsModel.isPicassoIndicatorEnabled())
+              .loggingEnabled(developerSettingsModel.isPicassoLoggingEnabled())
+              .listener((picasso1, uri, ex) -> Log.e("Picasso.onImageLoadFailed", uri, ex))
+              .build();
     }
 }

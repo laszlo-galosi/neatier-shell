@@ -17,13 +17,24 @@ package com.neatier.shell.internal.di;
 import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
+import com.neatier.commons.helpers.JsonSerializer;
 import com.neatier.commons.helpers.SharedKeyValueStore;
+import com.neatier.data.entity.AutoValueAdapterFactory;
+import com.neatier.data.network.ChangeableBaseUrl;
 import com.neatier.shell.appframework.Navigator;
 import com.neatier.shell.appframework.helpers.DialogMaker;
+import com.neatier.shell.data.network.RestApi;
+import com.neatier.shell.data.network.retrofit.RetrofitRestApi;
+import com.neatier.shell.data.network.retrofit.ServiceFactory;
+import com.neatier.shell.data.repository.SimpleJsonResponseDataSource;
 import com.neatier.shell.factorysettings.AppSettings;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
+import okhttp3.OkHttpClient;
 
 @Module
 public class ApplicationModule {
@@ -37,7 +48,7 @@ public class ApplicationModule {
     @Provides
     @NonNull
     @Singleton
-    public Application provideHirTVApplication() {
+    public Application provideNeatierApplication() {
         return application;
     }
 
@@ -58,9 +69,37 @@ public class ApplicationModule {
         return application;
     }
 
+    @Provides @NonNull @Singleton
+    public Gson provideGson() {
+        return new GsonBuilder()
+              .setLenient()
+              .registerTypeAdapterFactory(new AutoValueAdapterFactory())
+              .create();
+    }
+
+    @Provides @NonNull @Singleton
+    public JsonSerializer provideJsonSerializer(final Gson gson) {
+        return new JsonSerializer(gson, new JsonParser());
+    }
+
     @Provides
     @Singleton
-    protected SharedKeyValueStore<String, Object> provideSharedKeyValueStore(Context context) {
+    protected SharedKeyValueStore<String, Object> provideSettingsStore(Context context) {
         return new SharedKeyValueStore<>(context, AppSettings.PREF_DEFAULT_STORAGE_FILE);
+    }
+
+    @Provides @NonNull @Singleton RestApi provideRestApi(
+          final Context context,
+          final OkHttpClient okHttpClient,
+          @NonNull ChangeableBaseUrl changeableBaseUrl, JsonSerializer jsonSerializer) {
+        ServiceFactory serviceFactory = new ServiceFactory(changeableBaseUrl, okHttpClient,
+                                                           jsonSerializer);
+        return new RetrofitRestApi(context, serviceFactory, changeableBaseUrl, okHttpClient);
+    }
+
+    @Provides @Singleton @NonNull
+    public SimpleJsonResponseDataSource provideSimpleApiDataSource(RestApi restApi,
+          JsonSerializer serializer) {
+        return new SimpleJsonResponseDataSource(restApi, serializer);
     }
 }

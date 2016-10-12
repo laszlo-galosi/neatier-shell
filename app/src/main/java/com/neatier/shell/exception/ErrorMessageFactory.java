@@ -14,11 +14,20 @@
 
 package com.neatier.shell.exception;
 
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.IntDef;
 import android.support.annotation.StringRes;
+import android.util.SparseArray;
+import com.fernandocejas.arrow.optional.Optional;
+import com.neatier.commons.exception.NetworkConnectionException;
+import com.neatier.commons.exception.RestApiResponseException;
+import com.neatier.commons.helpers.JsonSerializer;
 import com.neatier.shell.R;
-import retrofit.RetrofitError;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import trikita.log.Log;
 
 /**
@@ -30,6 +39,7 @@ public class ErrorMessageFactory {
     public static final int SHOW_AS_ALERT = 1;
     public static final int ERROR_UNAUTHORIZED_REQUEST = 401;
     public static final int ERROR_INTERNAL = 500;
+    private JsonSerializer mJsonSerializer;
 
     public static ErrorMessageFactory getInstance() {
         return SInstanceHolder.sInstance;
@@ -37,40 +47,58 @@ public class ErrorMessageFactory {
 
     private ErrorMessageFactory() {
         //empty
+        mJsonSerializer = new JsonSerializer<>();
     }
 
     /**
-     * Creates a String representing an error message.
+     * Creates a String representing an error name.
      *
-     * @param throwable An exception used as a condition to retrieve the correct error message.
-     * @return {@link String} an error message.
+     * @param throwable An exception used as a condition to retrieve the correct error name.
+     * @return {@link String} an error name.
      */
     public static Error create(Throwable throwable) {
-        Log.e("Exception occurred:", throwable);
+        //Log.e("Exception occurred:", throwable);
         //exception.printStackTrace();
-        if (throwable instanceof NetworkConnectionException) {
+        if (throwable instanceof com.neatier.commons.exception.NetworkConnectionException) {
             return new Error(SHOW_AS_SNACK,
                              R.string.exception_message_no_connection).setDisableCloud(true);
-        } else if (throwable instanceof RestApiResponseException) {
-            return getByRestApiResponse((RestApiResponseException) throwable);
+        } else if (throwable instanceof com.neatier.commons.exception.RestApiResponseException) {
+            return getByRestApiResponse(
+                  (com.neatier.commons.exception.RestApiResponseException) throwable);
         } else {
             return new Error(SHOW_AS_SNACK, R.string.exception_message_generic);
         }
     }
 
-    private static Error getByRestApiResponse(final RestApiResponseException exception) {
-        RestApiResponseException.ErrorResponse errorResponse =
+    private static Error getByRestApiResponse(
+          final com.neatier.commons.exception.RestApiResponseException exception) {
+        com.neatier.commons.exception.RestApiResponseException.ErrorResponse errorResponse =
               exception.getErrorResponse();
         Log.d("Api response error ", errorResponse);
-        if (errorResponse == null) {
-            return new Error(SHOW_AS_SNACK, R.string.exception_message_generic);
-        }
-        if (RetrofitError.Kind.NETWORK.name().equals(errorResponse.error)
-              || exception.getStatusCode() == ERROR_INTERNAL) {
-            return new Error(SHOW_AS_ALERT, R.string.exception_message_server_error)
-                  .setDisableCloud(true);
-        } else {
-            return new Error(SHOW_AS_SNACK, R.string.exception_message_generic);
+        RestApiResponseException.ErrorKind kind = exception.getKind();
+        switch (kind.id) {
+            case RestApiResponseException.ErrorKind.NETWORK:
+            case RestApiResponseException.ErrorKind.SERVER:
+                if (exception.getCause() instanceof NetworkConnectionException) {
+                    return new Error(SHOW_AS_SNACK,
+                                     R.string.exception_message_no_connection)
+                          .setDisableCloud(true);
+                } else {
+                    return new Error(SHOW_AS_SNACK, R.string.exception_message_server_error)
+                          .setRemoteAddress(exception.getRemoteAddress())
+                          .setDisableCloud(true);
+                }
+            case RestApiResponseException.ErrorKind.AUTHENTICATION:
+                return new Error(SHOW_AS_SNACK, R.string.exception_message_authentication)
+                      .setDisableCloud(true);
+            case RestApiResponseException.ErrorKind.REQUEST:
+                Optional<ApiError> apiError = ApiError.find(exception.getReason());
+                if (apiError.isPresent()) {
+                    return apiError.get().getError();
+                }
+                return new Error(SHOW_AS_SNACK, R.string.exception_message_generic);
+            default:
+                return new Error(SHOW_AS_SNACK, R.string.exception_message_generic);
         }
     }
 
@@ -81,17 +109,25 @@ public class ErrorMessageFactory {
     public static class Error implements Parcelable {
         private int showAs;
         private @StringRes int messageRes;
+        private String rawMessage;
         private boolean disableCloud = false;
         private boolean shouldKickUserOut = false;
+        private String remoteAddress;
 
         public Error(final int showAs, @StringRes final int messageRes) {
             this.showAs = showAs;
             this.messageRes = messageRes;
         }
 
+        public Error(final int showAs, final String message) {
+            this.showAs = showAs;
+            this.rawMessage = message;
+        }
+
         protected Error(Parcel in) {
             showAs = in.readInt();
             messageRes = in.readInt();
+            rawMessage = in.readString();
             disableCloud = in.readByte() != 0;
             shouldKickUserOut = in.readByte() != 0;
         }
@@ -100,6 +136,7 @@ public class ErrorMessageFactory {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(showAs);
             dest.writeInt(messageRes);
+            dest.writeString(rawMessage);
             dest.writeByte((byte) (disableCloud ? 1 : 0));
             dest.writeByte((byte) (shouldKickUserOut ? 1 : 0));
         }
@@ -141,6 +178,10 @@ public class ErrorMessageFactory {
             return messageRes;
         }
 
+        public String getRawMessage() {
+            return rawMessage;
+        }
+
         public Error setDisableCloud(final boolean disableCloud) {
             this.disableCloud = disableCloud;
             return this;
@@ -151,14 +192,85 @@ public class ErrorMessageFactory {
             return this;
         }
 
+        public String getRemoteAddress() {
+            return remoteAddress;
+        }
+
+        public Error setRemoteAddress(final String remoteAddress) {
+            this.remoteAddress = remoteAddress;
+            return this;
+        }
+
         @Override public String toString() {
             final StringBuilder sb = new StringBuilder("Error{");
             sb.append("showAs=").append(showAs);
-            sb.append(", messageRes=").append(messageRes);
+            sb.append(", displayableMsgRes=").append(messageRes);
+            sb.append(", rawMessage=").append(rawMessage);
             sb.append(", disableCloud=").append(disableCloud);
             sb.append(", shouldKickUserOut=").append(shouldKickUserOut);
             sb.append('}');
             return sb.toString();
+        }
+    }
+
+    public static class ApiError {
+        private static SparseArray<ApiError> values;
+        static TypedArray sPrefKeys;
+        public final int id;
+        public final String name;
+
+        public static void init(final Context context) {
+            sPrefKeys = context.getResources().obtainTypedArray(R.array.error_msgs);
+            int len = sPrefKeys.length();
+            values = new SparseArray<>(len);
+            for (int i = 0; i < len; i++) {
+                int id = sPrefKeys.getResourceId(i, -1);
+                values.put(id, new ApiError(id, sPrefKeys.getString(i)));
+            }
+        }
+
+        public static Optional<ApiError> find(int id) {
+            return Optional.fromNullable(values.get(id));
+        }
+
+        public static Optional<ApiError> find(String name) {
+            for (int i = 0, len = values.size(); i < len; i++) {
+                @ApiErrorId int keyId = values.keyAt(i);
+                if (values.get(keyId).name.equals(name)) {
+                    return find(keyId);
+                }
+            }
+            return Optional.absent();
+        }
+
+        public ApiError(final int id, final String message) {
+            this.id = id;
+            this.name = message;
+        }
+
+        @Override public String toString() {
+            return name;
+        }
+
+        public @StringRes int displayableMessageRes() {
+            switch (id) {
+                default:
+                    return R.string.exception_message_generic;
+            }
+        }
+
+        public Error getError() {
+            switch (id) {
+                default:
+                    return new Error(SHOW_AS_SNACK, displayableMessageRes());
+            }
+        }
+
+        @IntDef({})
+        @Retention(RetentionPolicy.SOURCE)
+        /**
+         * {@link InDef} annotation for identifying unique app events.
+         */ public @interface ApiErrorId {
         }
     }
 }
