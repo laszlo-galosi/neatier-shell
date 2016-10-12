@@ -312,7 +312,7 @@ public class MainActivity extends MultiFragmentActivity implements
         return mainComponent;
     }
 
-    @Override protected <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
+    @Override public <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
           final BundleWrapper instanceBundleWrapper) {
         return Optional.of((T) HomeFragment.newInstance(instanceBundleWrapper));
     }

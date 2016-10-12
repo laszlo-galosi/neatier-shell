@@ -37,6 +37,8 @@ public class Item {
     public static final int SELF_CONTAINER = R.string.SELF_CONTAINER;
     public static final int SETTINGS = R.string.SETTINGS;
     public static final int DIALOG = R.string.DIALOG;
+    public static final int PUSH_NOTIFICATION = R.string.PUSH_NOTIFICATION;
+    public static final int EXT_INTENT = R.string.EXT_INTENT;
 
     private static SparseArray<Item> values;
     static TypedArray sItemIds;
@@ -68,7 +70,7 @@ public class Item {
     }
 
     @IntDef({ UNKNOWN_ITEM, TOOLBAR, SNACKBAR, NAV_MENU_ITEM, SELF, SELF_CONTAINER, SETTINGS,
-                  DIALOG })
+                  DIALOG, PUSH_NOTIFICATION, EXT_INTENT })
     @Retention(RetentionPolicy.SOURCE)
     /**
      * {@link InDef} annotation for identifying unique app items.

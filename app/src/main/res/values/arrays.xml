@@ -27,6 +27,8 @@
     <item>@string/EVT_ITEM_REMOVED</item>
     <item>@string/EVT_ITEM_CHANGED</item>
     <item>@string/EVT_PREF_CHANGED</item>
+    <item>@string/EVT_SEND</item>
+    <item>@string/EVT_RESULT</item>
   </string-array>
 
   <string-array name="item_ids">
@@ -37,6 +39,8 @@
     <item>@string/SELF</item>
     <item>@string/SELF_CONTAINER</item>
     <item>@string/DIALOG</item>
+    <item>@string/PUSH_NOTIFICATION</item>
+    <item>@string/EXT_INTENT</item>
   </string-array>
 
   <string-array name="event_params">
@@ -52,7 +56,12 @@
     <item>@string/PRM_ITEM_COLOR</item>
     <item>@string/PRM_ITEM_URL</item>
     <item>@string/PRM_DETAILS</item>
+    <item>@string/PRM_REQUEST_CODE</item>
+    <item>@string/PRM_RESULT_CODE</item>
+    <item>@string/PRM_ACTION</item>
   </string-array>
+
+  <string-array name="error_msgs"></string-array>
 
   <string name="EVT_UNKNOWN" translatable="false">Unknown</string>
   <string name="EVT_NAVIGATE" translatable="false">Navigate</string>
@@ -67,6 +76,8 @@
   <string name="EVT_ITEM_CHANGED" translatable="false">ItemChanged</string>
   <string name="EVT_ITEM_REMOVED" translatable="false">ItemRemoved</string>
   <string name="EVT_PREF_CHANGED" translatable="false">UserPrefsChannged</string>
+  <string name="EVT_SEND" translatable="false">EventSend</string>
+  <string name="EVT_RESULT" translatable="false">EventResult</string>
 
   <string name="UNKNOWN_ITEM" translatable="false">Unknown</string>
   <string name="TOOLBAR" translatable="false">Toolbar</string>
@@ -76,6 +87,8 @@
   <string name="SELF_CONTAINER" translatable="false">SelfContainer</string>
   <string name="SETTINGS" translatable="false">Settings</string>
   <string name="DIALOG" translatable="false">Dialog</string>
+  <string name="PUSH_NOTIFICATION" translatable="false">PushNotification</string>
+  <string name="EXT_INTENT" translatable="false">ExtIntent</string>
 
 
   <string name="PRM_VALUE" translatable="false">PrmValue</string>
@@ -90,4 +103,7 @@
   <string name="PRM_ITEM_COLOR" translatable="false">PrmItemColor</string>
   <string name="PRM_ITEM_URL" translatable="false">PrmItemUrl</string>
   <string name="PRM_DETAILS" translatable="false">PrmDetails</string>
+  <string name="PRM_REQUEST_CODE" translatable="false">PrmRequestCode</string>
+  <string name="PRM_RESULT_CODE" translatable="false">PrmResultCode</string>
+  <string name="PRM_ACTION" translatable="false">PrmAction</string>
 </resources>

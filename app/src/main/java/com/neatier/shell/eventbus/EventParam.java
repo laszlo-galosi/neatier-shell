@@ -40,6 +40,9 @@ public class EventParam {
     public static final int PRM_ITEM_COLOR = R.string.PRM_ITEM_COLOR;
     public static final int PRM_ITEM_URL = R.string.PRM_ITEM_URL;
     public static final int PRM_DETAILS = R.string.PRM_DETAILS;
+    public static final int PRM_REQUEST_CODE = R.string.PRM_REQUEST_CODE;
+    public static final int PRM_RESULT_CODE = R.string.PRM_RESULT_CODE;
+    public static final int PRM_ACTION = R.string.PRM_ACTION;
 
     private static SparseArray<EventParam> values;
 
@@ -84,7 +87,8 @@ public class EventParam {
     }
 
     @IntDef({ PRM_VALUE, PRM_ITEM_ID, PRM_ITEM_POS, PRM_ITEM_TEXT, PRM_ITEM_DATE, PRM_ITEM_TYPE,
-                  PRM_ITEM_IMAGE, PRM_ITEM_THUMBNAIL, PRM_ITEM_COLOR, PRM_ITEM_URL, PRM_DETAILS
+                  PRM_ITEM_IMAGE, PRM_ITEM_THUMBNAIL, PRM_ITEM_COLOR, PRM_ITEM_URL, PRM_DETAILS,
+                  PRM_REQUEST_CODE, PRM_RESULT_CODE, PRM_ACTION
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventParamId {

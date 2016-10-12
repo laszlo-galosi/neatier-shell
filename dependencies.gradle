@@ -24,19 +24,19 @@ allprojects {
  **/
 def supportVersion = '24.2.0'
 ext.versions = [//Android framework
-                code                         : 1,
-                name                         : '1.0',
+                code                    : 2,
+                name                    : '1.2',
 
-                androidBuildToolsVersion     : "24.0.3",
-                androidMinSdkVersion         : 15,
-                androidTargetSdkVersion      : 23,
-                androidCompileSdkVersion     : 23,
-                multidexVersion              : '1.0.1',
+                androidBuildToolsVersion: "24.0.3",
+                androidMinSdkVersion    : 15,
+                androidTargetSdkVersion : 23,
+                androidCompileSdkVersion: 23,
+                multidexVersion         : '1.0.1',
 
-                androidGradlePlugin          : '2.2.1',
-                aptGradlePlugin              : '1.8',
-                paperworkGradlePlugin        : '1.2.7',
-                retrolambdaGradlePlugin      : '3.2.5',
+                androidGradlePlugin     : '2.2.1',
+                aptGradlePlugin         : '1.8',
+                paperworkGradlePlugin   : '1.2.7',
+                retrolambdaGradlePlugin : '3.2.5',
                 jacocoGradlePlugin           : '0.7.6.201602180812',
                 androidDevMetricsGradlePlugin: '0.4',
                 gmsPlugin                    : '3.0.0',

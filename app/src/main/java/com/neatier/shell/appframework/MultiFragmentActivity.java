@@ -42,12 +42,14 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.PermissionRequest;
+import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.Unbinder;
 import com.fernandocejas.arrow.optional.Optional;
@@ -68,13 +70,19 @@ import com.neatier.shell.factorysettings.AppSettings;
 import com.neatier.shell.internal.di.ActivityModule;
 import com.neatier.shell.internal.di.ApplicationComponent;
 import com.neatier.widgets.helpers.DrawableHelper;
+import com.neatier.widgets.helpers.WidgetUtils;
+import java.util.List;
 import javax.inject.Inject;
+import rx.Observable;
 import rx.Subscriber;
 import rx.android.app.AppObservable;
 import rx.functions.Func1;
 import rx.subscriptions.CompositeSubscription;
 import trikita.log.Log;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
+import static com.neatier.shell.factorysettings.AppSettings.PENDING_CALL_REQUEST_CODE;
+import static com.neatier.shell.factorysettings.AppSettings.PREFKEY_PERMISION_DENIED_COUNT;
 
 /**
  * Base {@link AppCompatActivity} activity for navigation between multiple screens of {@link
@@ -92,8 +100,6 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
       implements FragmentManager.OnBackStackChangedListener,
                  ActivityCompat.OnRequestPermissionsResultCallback {
 
-    protected static final String ARG_CURRENT_FRAGMENT_TAG = "CurrentFragementTag";
-
     protected CompositeSubscription subscriptions = new CompositeSubscription();
 
     protected RxUtils.SubscriberAdapter mEventSubscriber;
@@ -103,9 +109,10 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     protected KeyValuePairs<String, Object> mApiParams;
     protected KeyValuePairs<String, PendingIntent> mRequestedPermissionIntents =
           new KeyValuePairs<>(2);
+    protected KeyValuePairs<String, Integer> mRequestedPermissionRequestCodes =
+          new KeyValuePairs<>(2);
 
     protected Toolbar mToolbar;
-    protected AppBarLayout mAppbaAppBarLayout;
     protected Unbinder mUnbinder;
 
     @Inject Navigator navigator;
@@ -113,6 +120,8 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     @Inject protected SharedKeyValueStore<String, Object> sharedKeyValueStore;
 
     @BindView(R.id.mainLayout) protected CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.main_appbar) protected AppBarLayout mAppBarLayout;
+    @BindView(R.id.toolbar_title) protected TextView mToolbarTitleAndLogo;
 
     @Override protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -150,8 +159,30 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     @Override protected void onSaveInstanceState(Bundle outState) {
         Log.d("onSaveInstanceState").v(mMainBundle);
         outState.putAll(mMainBundle.getBundle());
-        outState.putString(ARG_CURRENT_FRAGMENT_TAG, mCurrentFragmentTag);
+        outState.putString(TaggedBaseFragment.ARG_CURRENT_FRAGMENT_TAG, mCurrentFragmentTag);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == AppSettings.REQUEST_GOOGLE_PLAY_SERVICES) {
+            EventBuilder.withItemAndType(Item.PUSH_NOTIFICATION, Event.EVT_RESULT)
+                        .addParam(EventParam.PRM_VALUE, resultCode)
+                        .send();
+        } else {
+            findPermmissionForRequestCode(requestCode).subscribe(foundPermission -> {
+                EventBuilder resultEvent =
+                      EventBuilder.withItemAndType(Item.EXT_INTENT, Event.EVT_RESULT)
+                                  .addParam(EventParam.PRM_REQUEST_CODE, requestCode)
+                                  .addParam(EventParam.PRM_RESULT_CODE, resultCode);
+                if (data != null) {
+                    resultEvent.addParam(EventParam.PRM_VALUE, data).send();
+                }
+                resultEvent.send();
+                mRequestedPermissionRequestCodes.remove(foundPermission);
+            });
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     private void unsubscribe() {
@@ -161,7 +192,6 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     }
 
     protected void setupToolbar() {
-        mAppbaAppBarLayout = (AppBarLayout) findViewById(R.id.main_appbar);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         final ActionBar ab = getSupportActionBar();
@@ -184,9 +214,10 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
               getDefaultFragmentInstance(instanceStateWrapper);
 
         if (defaultFragment.isPresent()) {
-            mCurrentFragmentTag = instanceStateWrapper.getString(ARG_CURRENT_FRAGMENT_TAG,
-                                                                 defaultFragment.get()
-                                                                                .getFragmentTag());
+            mCurrentFragmentTag = instanceStateWrapper.getString(
+                  TaggedBaseFragment.ARG_CURRENT_FRAGMENT_TAG,
+                  defaultFragment.get()
+                                 .getFragmentTag());
             addOrReplaceFragment(savedInstanceState, defaultFragment.get());
         }
     }
@@ -207,8 +238,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         int backStackCount = getSupportFragmentManager().getBackStackEntryCount();
-        boolean shouldGoBack = backStackCount > 1;
-        if (shouldGoBack) {
+        if (shouldGoBack()) {
             mCurrentFragmentTag =
                   getSupportFragmentManager().getBackStackEntryAt(backStackCount - 1).getName();
             super.onBackPressed();
@@ -219,6 +249,11 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
         }
     }
 
+    protected boolean shouldGoBack() {
+        int stackSize = getSupportFragmentManager().getBackStackEntryCount();
+        return stackSize > 1;
+    }
+
     @Override protected void onPause() {
         super.onPause();
         unsubscribe();
@@ -227,9 +262,13 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     @Override protected void onResume() {
         Log.d("onResume");
         super.onResume();
+        resubscribe();
+        onBackStackChanged();
+    }
+
+    protected void resubscribe() {
         this.subscriptions = ensureSubs();
         subscribeActivity(getOrCreateSubscriber(), null);
-        onBackStackChanged();
     }
 
     /**
@@ -289,10 +328,10 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
                     Event eventType = event.getEventType();
                     if (eventType.id == Event.EVT_INTERNAL_ERROR
                           || eventType.id == Event.EVT_MESSAGE) {
-                        event.logMe(getClass().getSimpleName(), "Received event").v(event);
-                        String message =
-                              event.getParamAs(EventParam.PRM_VALUE, String.class,
-                                               getString(R.string.snack_internal_error)).get();
+                        event.logReceived(getClass().getSimpleName()).v(event);
+                        String message = event.getStringParam(
+                              EventParam.PRM_VALUE, MultiFragmentActivity.this,
+                              getString(R.string.snack_internal_error));
                         dialogMaker.setMessage(message)
                                    .positiveAction(R.string.snackbar_action_ok);
                         if (eventType.id == Event.EVT_INTERNAL_ERROR) {
@@ -301,12 +340,13 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
                         makeSnackBar(item.id == Item.DIALOG);
                     } else if (item.id == Item.TOOLBAR
                           && event.hasParamWithType(EventParam.PRM_VALUE, String.class)) {
-                        event.logMe(getClass().getSimpleName(), "Received event").v(event);
+                        event.logReceived(getClass().getSimpleName()).v(event);
                         mToolbar.setTitle(
                               event.getParamAs(EventParam.PRM_VALUE, String.class).get());
                     } else if (eventType.id == Event.EVT_NAVIGATE) {
                         handleNavigation(event);
                     }
+                    onAppEvent(event);
                 }
             };
         }
@@ -335,23 +375,50 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     @SuppressWarnings("deprecation")
     @Override public void onBackStackChanged() {
         int stackSize = getSupportFragmentManager().getBackStackEntryCount();
+        Log.d("onBackStackChanged", stackSize);
         if (stackSize == 0) {
-            setToolbarTheme(R.drawable.ic_menu_24dp);
-            mToolbar.setTitle(R.string.app_name);
+            switchToolbarTheme(R.drawable.ic_menu_24dp);
+            mToolbar.setTitle(null);
             return;
         }
-        setToolbarTheme(R.drawable.ic_menu_24dp);
+        switchToolbarTheme(R.drawable.ic_menu_24dp);
         String fragmentTag =
               getSupportFragmentManager().getBackStackEntryAt(stackSize - 1).getName();
+        Log.d("onBackStackChanged", "currentFragment", fragmentTag);
         mCurrentFragmentTag = fragmentTag;
         TaggedBaseFragment fragment =
               (TaggedBaseFragment) getSupportFragmentManager().findFragmentByTag(fragmentTag);
         if (fragment != null) {
-            mToolbar.setTitle(fragment.getToolbarTitle());
+            boolean showLogo = fragment.shouldShowLogoOnToolbar();
+            String toolbarTitle = fragment.getToolbarTitle();
+            if (!showLogo && TextUtils.isEmpty(toolbarTitle)) {
+                mToolbar.setTitle(toolbarTitle);
+            }
+            WidgetUtils.setTextAndVisibilityOf(mToolbarTitleAndLogo, toolbarTitle, showLogo);
+            setToolbarItems(fragment);
         }
     }
 
     protected void handleNavigation(final EventBuilder event) {
+        Item item = event.getItem();
+        if (item.id == Item.EXT_INTENT) {
+            Optional<String> actionOpt = event.getParamAs(EventParam.PRM_ACTION, String.class);
+            Optional<String> urlOpt = event.getParamAs(EventParam.PRM_ITEM_URL, String.class);
+            if (actionOpt.isPresent() && urlOpt.isPresent()) {
+                String intentAction =
+                      event.getCheckedParam(EventParam.PRM_ACTION, String.class).get();
+                Uri dataUri = Uri.parse(
+                      event.getCheckedParam(EventParam.PRM_ITEM_URL, String.class).get());
+                String type =
+                      event.getParamAs(EventParam.PRM_ITEM_TYPE, String.class, "text/plain")
+                           .get();
+                Intent intent = new Intent(intentAction);
+                intent.setDataAndType(dataUri, type);
+                startActivity(intent);
+                overridePendingTransition(R.anim.enter_from_left,
+                                          R.anim.exit_to_right);
+            }
+        }
     }
 
     @Override public void onRequestPermissionsResult(final int requestCode,
@@ -362,9 +429,8 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
         //again with an alert dialog.
         for (int i = 0; i < permissions.length; i++) {
             Log.d("onRequestPermissionsResult", permissions[i], grantResults[i]);
-            String denialPrefKey =
-                  String.format("%s_%s", AppSettings.PREFKEY_PERMISION_DENIED_COUNT,
-                                permissions[i]);
+            String denialPrefKey = String.format("%s_%s", PREFKEY_PERMISION_DENIED_COUNT,
+                                                 permissions[i]);
             final int deniedCount =
                   sharedKeyValueStore.getAsOrDefault(denialPrefKey, Integer.class, 0);
             if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
@@ -377,9 +443,12 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
                 //Check if there is any pending intent for the requested permission.
                 Log.d("Checking pendintents for", permissions[i]);
                 PendingIntent pendingIntent = mRequestedPermissionIntents.get(permissions[i]);
+                int onGrantRequestCode =
+                      mRequestedPermissionRequestCodes.getOrDefault(permissions[i],
+                                                                    PENDING_CALL_REQUEST_CODE);
                 if (pendingIntent != null) {
                     try {
-                        pendingIntent.send();
+                        pendingIntent.send(onGrantRequestCode);
                     } catch (PendingIntent.CanceledException e) {
                         Log.e("Pending intent cancelled", pendingIntent, e);
                     }
@@ -405,8 +474,9 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
         T foundFragment;
         BundleWrapper savedStateWrapper = BundleWrapper.wrap(savedInstanceState);
         if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(ARG_CURRENT_FRAGMENT_TAG)) {
-                fragmentTag = savedStateWrapper.getString(ARG_CURRENT_FRAGMENT_TAG, fragmentTag);
+            if (savedInstanceState.containsKey(TaggedBaseFragment.ARG_CURRENT_FRAGMENT_TAG)) {
+                fragmentTag = savedStateWrapper.getString(
+                      TaggedBaseFragment.ARG_CURRENT_FRAGMENT_TAG, fragmentTag);
             }
             Log.d("Restoring fragment", fragmentTag, " from savedState:", savedInstanceState);
         }
@@ -428,65 +498,20 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     @SuppressLint("CommitTransaction")
     private void addFragment(int containerViewId, TaggedBaseFragment fragment, String fragmentTag) {
         Fragment f = (Fragment) fragment;
-        FragmentTransaction ft = getSupportFragmentManager()
-              .beginTransaction()
-              .add(containerViewId, (Fragment) fragment, fragmentTag)
-              .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-              .replace(containerViewId, f, fragmentTag);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        if (fragment instanceof BaseFragment) {
+            ((BaseFragment) fragment)
+                  .setCustomTransitionAnimations(ft, getLastXFragmentTagOnStack(1));
+        }
+        ft.add(containerViewId, (Fragment) fragment, fragmentTag)
+          .replace(containerViewId, f, fragmentTag);
         if (shouldAddToBackStack(fragment)) {
             ft.addToBackStack(fragment.getFragmentTag());
         }
         ft.commit();
     }
 
-    @SuppressLint("CommitTransaction")
-    private void replaceFragment(int containerViewId, final TaggedBaseFragment fragment,
-          String fragmentTag) {
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction()
-                                                            .setTransition(
-                                                                  FragmentTransaction
-                                                                        .TRANSIT_FRAGMENT_OPEN)
-                                                            .replace(containerViewId,
-                                                                     (Fragment) fragment,
-                                                                     fragmentTag);
-        if (shouldAddToBackStack(fragment)) {
-            ft.addToBackStack(fragment.getFragmentTag());
-        }
-        ft.commit();
-    }
-
-    public void setToolbarTheme(final @DrawableRes int drawableRes) {
-        int stackSize = getSupportFragmentManager().getBackStackEntryCount();
-        @DrawableRes int navigationIconRes = stackSize > 1 ? R.drawable.ic_arrow_back_24dp
-                                                           : R.drawable.ic_menu_24dp;
-        @ColorRes int colorRes = R.color.white;
-        final Drawable navDrawable = DrawableHelper
-              .withContext(MultiFragmentActivity.this)
-              .withColorRes(colorRes)
-              .withDrawable(navigationIconRes)
-              .tint()
-              .get();
-        final Drawable overflowDrawable = DrawableHelper
-              .withContext(MultiFragmentActivity.this)
-              .withColorRes(colorRes)
-              .withDrawable(R.drawable.ic_more_vert_24dp)
-              .tint()
-              .get();
-        //ab.setHomeAsUpIndicator(drawable);
-        mToolbar.setTitleTextColor(ContextCompat.getColor(this, colorRes));
-        mToolbar.setSubtitleTextColor(ContextCompat.getColor(this, colorRes));
-        mToolbar.setNavigationIcon(navDrawable);
-        mToolbar.setOverflowIcon(overflowDrawable);
-        mToolbar.setPopupTheme(R.style.ThemeOverlay_AppPopup);
-    }
-
-    /**
-     * Returns if the specified fragment should be added to the back stack.
-     *
-     * @param fragmentToAdd the new fragment to be added or not
-     * @return true, if the previous backstack entry not the fragment to be added.
-     */
-    private boolean shouldAddToBackStack(final TaggedBaseFragment fragmentToAdd) {
+    protected boolean shouldAddToBackStack(final TaggedBaseFragment fragmentToAdd) {
         final String fragmentTagToAdd = fragmentToAdd.getFragmentTag();
         final int backStackCount = getSupportFragmentManager().getBackStackEntryCount();
         String previousFragmentTag = null;
@@ -498,6 +523,49 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
                   getSupportFragmentManager().getBackStackEntryAt(backStackCount - 1).getName();
         }
         return previousFragmentTag == null || !previousFragmentTag.equals(fragmentTagToAdd);
+    }
+
+    @SuppressLint("CommitTransaction")
+    private void replaceFragment(int containerViewId, final TaggedBaseFragment fragment,
+          String fragmentTag) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        if (fragment instanceof BaseFragment) {
+            ((BaseFragment) fragment)
+                  .setCustomTransitionAnimations(ft, getLastXFragmentTagOnStack(1));
+        }
+        ft.replace(containerViewId, (Fragment) fragment, fragmentTag);
+        if (shouldAddToBackStack(fragment)) {
+            ft.addToBackStack(fragment.getFragmentTag());
+        }
+        ft.commit();
+    }
+
+    public void switchToolbarTheme(final @DrawableRes int drawableRes) {
+        @DrawableRes int navigationIconRes = shouldGoBack() ? R.drawable.ic_arrow_back_24dp
+                                                            : drawableRes;
+        @ColorRes int colorRes = R.color.colorTextPrimary;
+        final Drawable navDrawable = DrawableHelper
+              .withContext(MultiFragmentActivity.this)
+              .withColorRes(colorRes)
+              .withDrawable(navigationIconRes)
+              .tint()
+              .get();
+        //ab.setHomeAsUpIndicator(drawable);
+        mToolbar.setTitleTextColor(ContextCompat.getColor(this, colorRes));
+        mToolbar.setSubtitleTextColor(ContextCompat.getColor(this, colorRes));
+        mToolbar.setNavigationIcon(navDrawable);
+        mToolbar.setPopupTheme(R.style.AppPopup);
+    }
+
+    public Optional<String> getLastXFragmentTagOnStack(int lastX) {
+        int backStackCount = getSupportFragmentManager().getBackStackEntryCount();
+        if (backStackCount > 0) {
+            return Optional.fromNullable(getSupportFragmentManager()
+                                               .getBackStackEntryAt(
+                                                     Math.max(0, backStackCount - lastX)).getName()
+            );
+        }
+        return Optional.absent();
     }
 
     public void navigateToUrl(final String url) {
@@ -530,22 +598,28 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     /**
      * Returns the starter fragment of the {@link MultiFragmentActivity}
      */
-    protected <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
+    public <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
           final BundleWrapper instanceBundleWrapper) {
         return Optional.absent();
     }
 
-    private void requestPermission(final Intent intentToStart, final String permission) {
+    public void grantMePermission(final Intent intentToStart, final String permission,
+          int requestCodeForResult) {
 
-        String denialPrefKey =
-              String.format("%s_%s", AppSettings.PREFKEY_PERMISION_DENIED_COUNT,
-                            permission);
+        String denialPrefKey = String.format("%s_%s", PREFKEY_PERMISION_DENIED_COUNT,
+                                             permission);
         final int deniedCount =
               sharedKeyValueStore.getAsOrDefault(denialPrefKey, Integer.class, Integer.valueOf(0));
         Log.d("requestPermission", permission, denialPrefKey, deniedCount);
+        mRequestedPermissionRequestCodes.put(permission, requestCodeForResult);
         if (ActivityCompat.checkSelfPermission(this, permission)
               != PackageManager.PERMISSION_GRANTED) {
             ;
+            mRequestedPermissionIntents.put(
+                  permission, PendingIntent.getActivity(this, requestCodeForResult,
+                                                        intentToStart,
+                                                        PendingIntent.FLAG_CANCEL_CURRENT)
+            );
             boolean showRationale = shouldExplainPermissionRequest(permission, deniedCount);
             if (deniedCount == 0) {
                 ActivityCompat.requestPermissions(
@@ -557,18 +631,20 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
             //We store the intent in a pendingIntent
             // Explicit intent to wrap
             // Create pending intent and wrap our intent
-            mRequestedPermissionIntents.put(
-                  permission, PendingIntent.getActivity(this, AppSettings.PENDING_CALL_REQUEST_CODE,
-                                                        intentToStart,
-                                                        PendingIntent.FLAG_CANCEL_CURRENT)
-            );
             return;
         }
         try {
-            startActivity(intentToStart);
+            mRequestedPermissionRequestCodes.put(permission, requestCodeForResult);
+            startActivityForResult(intentToStart, requestCodeForResult);
         } catch (final Exception ex) {
             Log.e(ex);
         }
+    }
+
+    protected Observable<String> findPermmissionForRequestCode(int requestCode) {
+        return mRequestedPermissionRequestCodes.keysAsStream()
+                                               .filter(key -> mRequestedPermissionRequestCodes.get(
+                                                     key) == requestCode);
     }
 
     private boolean shouldExplainPermissionRequest(final String permission, int denialCount) {
@@ -589,7 +665,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
      */
     private void explainPermissionRequest(final String permission) {
         final String denialPrefKey =
-              String.format("%s_%s", AppSettings.PREFKEY_PERMISION_DENIED_COUNT, permission);
+              String.format("%s_%s", PREFKEY_PERMISION_DENIED_COUNT, permission);
         final int deniedCount =
               sharedKeyValueStore.getAsOrDefault(denialPrefKey, Integer.class, 0);
         boolean showPermissionRationale = shouldExplainPermissionRequest(permission, deniedCount);
@@ -612,7 +688,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
                        });
             dialogMaker.makeAlert(this);
         } else {
-            //If the denial count is reached the limit, simply show a snackbar warning, on postive
+            //If the denial count is reached the limit, simply show a snackbar warning, on positive
             //action navigates to the application settings screen.
             final ComponentName activityCompName =
                   new ComponentName(MultiFragmentActivity.this, MainActivity.class);
@@ -644,11 +720,10 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     private String getPermissionExplanation(final String permission, final int deniedCount) {
         String message = "";
         boolean showRationale = shouldExplainPermissionRequest(permission, deniedCount);
-        if (permission.equals(Manifest.permission.CALL_PHONE)) {
+        if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
             message = getString(showRationale
-                                ? R.string.message_permission_required
-                                : R.string
-                                      .message_permission_not_granted);
+                                ? R.string.message_read_ext_storage_permission_required
+                                : R.string.message_read_ext_storage_permission_not_granted);
         }
         return message;
     }
@@ -712,5 +787,20 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
 
     public SharedKeyValueStore getSharedKeyValueStore() {
         return sharedKeyValueStore;
+    }
+
+    protected void setToolbarItems(final TaggedBaseFragment fragment) {
+        List<Integer> actionIds = fragment.getDisplayableToolbarIcons();
+        Observable.range(0, mToolbar.getMenu().size())
+                  .map(index -> mToolbar.getMenu().getItem(index))
+                  .map(menuItem -> menuItem.getItemId())
+                  .concatWith(Observable.from(actionIds))
+                  .distinct()
+                  .subscribe(itemId -> {
+                      MenuItem menuItem = mToolbar.getMenu().findItem(itemId);
+                      if (menuItem != null) {
+                          menuItem.setVisible(actionIds.contains(itemId));
+                      }
+                  });
     }
 }

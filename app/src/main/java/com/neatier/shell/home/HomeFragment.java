@@ -78,6 +78,7 @@ public class HomeFragment extends BaseFragment implements
     public static final String TAG = "HomeFragment";
 
     @Inject HomePresenter mHomePresenter;
+    @Inject Picasso mPicassoInstance;
 
     @BindView(R.id.rv_main_content) RecyclerView mRecyclerView;
     @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
@@ -314,7 +315,7 @@ public class HomeFragment extends BaseFragment implements
         return mDividerDecoration;
     }
 
-    static class HomeItemAdapter<T> extends ItemWidgetAdapter {
+    class HomeItemAdapter<T> extends ItemWidgetAdapter {
         public HomeItemAdapter(final Context context) {
             this(context, new ArrayList<>(30));
         }
@@ -326,7 +327,7 @@ public class HomeFragment extends BaseFragment implements
         @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
               int viewType) {
             ItemWidget itemWidget =
-                  new ItemWidget(getItemLayout(viewType), getItemHeight(), mContext)
+                  new ItemWidget(getItemLayout(viewType), getItemHeight(viewType), mContext)
                         .withBackgroundColor(R.color.white)
                         .setContentClickable(true);
             itemWidget.initView(mContext);
@@ -342,7 +343,7 @@ public class HomeFragment extends BaseFragment implements
         }
     }
 
-    static class HomeItemViewHolder extends ItemViewHolderBase implements Target {
+    class HomeItemViewHolder extends ItemViewHolderBase implements Target {
 
         //NightMode related container views
         @BindView(R.id.itemText) TextView mTitleView;
@@ -379,15 +380,12 @@ public class HomeFragment extends BaseFragment implements
                                                                         Integer.class).get();
             try {
                 int widthPx = mContext.getResources().getDimensionPixelSize(R.dimen.thumb_width);
-                Picasso picasso = Picasso.with(itemView.getContext());
-                //Todo: remove indicators from release version
-                picasso.setIndicatorsEnabled(true);
-                picasso.load(drawableRes)
-                       .centerCrop()
-                       .resize(widthPx, widthPx)
-                       .error(R.drawable.img_placeholder)
-                       .placeholder(R.drawable.img_placeholder)
-                       .into(mItemImageView);
+                mPicassoInstance.load(drawableRes)
+                                .centerCrop()
+                                .resize(widthPx, widthPx)
+                                .error(R.drawable.img_placeholder)
+                                .placeholder(R.drawable.img_placeholder)
+                                .into(mItemImageView);
             } catch (final Exception ex) {
                 Log.e("Failed to load Bitmap from resource", drawableRes, ex);
             }

@@ -12,22 +12,26 @@
  *   Delight Solutions Kft.
  */
 
-package com.neatier.shell.appframework;
+package com.neatier.shell.activities;
 
-import java.util.List;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 /**
- * Created by László Gálosi on 12/05/16
+ * Created by László Gálosi on 06/04/16
  */
-public interface TaggedBaseFragment {
-    String ARG_CURRENT_FRAGMENT_TAG = "CurrentFragmentTag";
+public class NotificationActivity extends AppCompatActivity {
 
-    String getFragmentTag();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    String getToolbarTitle();
-
-    boolean shouldShowLogoOnToolbar();
-
-    List<Integer> getDisplayableToolbarIcons();
-
+        Intent intent = new Intent(this, MainActivity.class);
+        if (getIntent().getExtras() != null) {
+            intent.putExtras(getIntent().getExtras());
+        }
+        startActivity(intent);
+        finish();
+    }
 }

@@ -27,4 +27,12 @@
   <string name="message_permission_required">Permission is required, explain it to
     your users why.
   </string>
+  <string name="exception_message_authentication">Authentication error</string>
+  <string name="message_read_ext_storage_permission_required">In order to ... we need your
+    permission to access external storage.
+  </string>
+  <string name="message_read_ext_storage_permission_not_granted">External storage access permission
+    required.
+  </string>
+  <string name="fcm_message_default">Default push message</string>
 </resources>

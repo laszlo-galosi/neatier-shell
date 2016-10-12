@@ -20,13 +20,18 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import com.fernandocejas.arrow.collections.Lists;
 import com.fernandocejas.arrow.optional.Optional;
 import com.neatier.commons.helpers.BundleWrapper;
 import com.neatier.commons.helpers.KeyValuePairs;
@@ -41,7 +46,9 @@ import com.neatier.shell.eventbus.EventParam;
 import com.neatier.shell.eventbus.Item;
 import com.neatier.shell.eventbus.RxBus;
 import com.neatier.shell.exception.ErrorMessageFactory;
+import com.neatier.shell.exception.RxLogger;
 import com.neatier.shell.internal.di.HasComponent;
+import java.util.List;
 import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
@@ -65,6 +72,12 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     protected boolean mWaitingForModelUpdate;
     protected boolean mLayoutReady;
     protected boolean mInitWithError;
+    protected boolean mWaitingForDestroy;
+    private MenuItem mNavMenuItem;
+    protected View mPasswordView;
+    protected EditText mPasswordField;
+    protected Button mPasswordButtonNext;
+    protected View mAccessBackgroundView;
 
     @CallSuper
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -81,7 +94,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     @CallSuper @Nullable
     @Override public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
           final Bundle savedInstanceState) {
-        Log.v(getFragmentTag(), "onCreateView")
+        Log.d(getFragmentTag(), "onCreateView")
            .v("savedState:", savedInstanceState);
         View fragmentView = inflater.inflate(getContentLayout(), container, false);
         onInflateLayout(fragmentView, savedInstanceState);
@@ -98,8 +111,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
      */
     @CallSuper
     protected void onInflateLayout(final View contentView, final Bundle savedInstanceState) {
-        Log.v(getFragmentTag(), "onInflateLayout")
-           .v("savedState:", savedInstanceState);
+        Log.v(getFragmentTag(), "onInflateLayout").v("savedState:", savedInstanceState);
         mUnbinder = ButterKnife.bind(this, contentView);
         if (hasProgressView()) {
             bindProgressView(contentView);
@@ -141,6 +153,9 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         Log.d(getFragmentTag(), "onResume");
         loadStateArguments();
         resubscribe();
+        if (isAccessProtected() && mPasswordField != null) {
+            mPasswordField.setText(null);
+        }
         super.onResume();
     }
 
@@ -162,14 +177,17 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
 
     @CallSuper
     @Override public void onDestroyView() {
-        Log.v(getFragmentTag(), "onDestroyView");
+        Log.d(getFragmentTag(), "onDestroyView");
+        hideSoftKeyboard(getView());
         super.onDestroyView();
     }
 
     @Override public void onDestroy() {
-        Log.v(getFragmentTag(), "onDestroy");
+        Log.d(getFragmentTag(), "onDestroy");
+        mWaitingForDestroy = true;
         clearLeakables();
         super.onDestroy();
+        mWaitingForDestroy = false;
     }
 
     @Override public void clearLeakables() {
@@ -197,7 +215,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
      */
     @SuppressWarnings("unchecked")
     protected void resubscribe() {
-        Log.v(getFragmentTag(), "resubscribe");
+        Log.v(getFragmentTag(), "resubscribe", this.subscription);
         ensureSubs().add(
               AppObservable.bindFragment(this, RxBus.getInstance()
                                                     .toObservable(getEventFilter()))
@@ -258,7 +276,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
      * Override this function for custom {@link RxBus} error handling.
      */
     protected void onAppEventError(final Throwable throwable) {
-        RxUtils.logRxError().call(throwable);
+        RxLogger.logRxError().call(throwable);
         RxBus.getInstance().send(
               EventBuilder.withItemAndType(Item.SNACKBAR, Event.EVT_INTERNAL_ERROR)
         );
@@ -268,7 +286,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
      * {@link RxBus} event handling.
      */
     public void onAppEvent(EventBuilder event) {
-        event.logMe(getFragmentTag(), "Received event").v(event);
+        event.logReceived(getFragmentTag(), "onAppEvent").v(event);
     }
 
     /**
@@ -301,9 +319,19 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     /**
      * @return te custom toolbar title string of the implementing {@link BaseFragment}.
      */
-    public abstract String getToolbarTitle();
+    public String getToolbarTitle() {
+        return "";
+    }
 
     public abstract boolean hasProgressView();
+
+    public boolean isAccessProtected() {
+        return false;
+    }
+
+    public boolean hasBottomNavigationBar() {
+        return true;
+    }
 
     protected void bindProgressView(View fragmentView) {
         Log.v(getFragmentTag(), "bindProgressView");
@@ -330,12 +358,23 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     }
 
     public boolean shouldShowLogoOnToolbar() {
-        return false;
+        return true;
+    }
+
+    public List<Integer> getDisplayableToolbarIcons() {
+        return Lists.newArrayList(android.R.id.home);
     }
 
     @Override public void showError(final ErrorMessageFactory.Error error) {
+        StringBuilder message = new StringBuilder();
+        if (error.getMessageRes() > 0) {
+            message.append(getString(error.getMessageRes()));
+        }
+        if (error.getRawMessage() != null) {
+            message.append(error.getRawMessage());
+        }
         DialogMaker.getInstance()
-                   .setMessageRes(error.getMessageRes())
+                   .setMessage(message.toString())
                    .positiveAction(R.string.snackbar_action_ok);
         ((MainActivity) getActivity()).makeSnackBar(error.showAsAlert());
     }
@@ -384,5 +423,13 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         }
         event.addParam(EventParam.PRM_VALUE, paramAsString.get());
         return paramAsString;
+    }
+
+    public void setCustomTransitionAnimations(FragmentTransaction fragmentTransaction,
+          Optional<String> openAtFragmentTag) {
+        fragmentTransaction.setCustomAnimations(R.anim.enter_from_right,
+                                                R.anim.exit_to_left,
+                                                R.anim.enter_from_left,
+                                                R.anim.exit_to_right);
     }
 }

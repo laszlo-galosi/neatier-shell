@@ -107,7 +107,7 @@ public class NavigationMenuItemAdapter<T extends MenuItem>
             return new MenuHeaderViewHolder(headerView, mContext);
         } else {
             ItemWidget itemWidget =
-                  new ItemWidget(itemLayout, getItemHeight(), mContext)
+                  new ItemWidget(itemLayout, getItemHeight(viewType), mContext)
                         .setContentClickable(true);
             itemWidget.initView(mContext);
             return new MenuItemViewHolder(itemWidget, mContext);
