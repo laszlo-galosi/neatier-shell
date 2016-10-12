@@ -1,12 +1,23 @@
+buildscript {
+  repositories {
+    maven { url 'https://maven.fabric.io/public' }
+  }
+
+  dependencies {
+    classpath 'io.fabric.tools:gradle:1.+'
+  }
+}
 repositories {
   jcenter()
   mavenCentral()
   maven {
     url 'https://oss.sonatype.org/content/repositories/snapshots/'
   }
+  maven { url 'https://maven.fabric.io/public' }
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 apply from: '../dependencies.gradle'
 //Dagger 2 annotation processor
 apply plugin: 'com.neenbedankt.android-apt'
@@ -56,12 +67,12 @@ android {
 
   buildTypes {
     release {
-      minifyEnabled false
+      minifyEnabled true
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
       signingConfig signingConfigs.release
     }
     debug {
-      //      minifyEnabled false
+      minifyEnabled true
       signingConfig signingConfigs.debug
       applicationIdSuffix '.debug'
     }
@@ -131,6 +142,7 @@ dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
   compile project(':neatier-commons:commons')
   compile project(':neatier-commons:widgets')
+  compile project(':neatier-commons:repository')
 
   //    Optional, Collections, Guava like but lightweight on method count library
 
@@ -161,6 +173,14 @@ dependencies {
   //  compile appBuildingDependencies.jodaTimeAndroid
   compile appBuildingDependencies.picasso
   compile appBuildingDependencies.calligraphy
+
+  //Google play services
+  compile appBuildingDependencies.fcm
+
+  //Crashlytics
+  compile('com.crashlytics.sdk.android:crashlytics:2.6.1@aar') {
+    transitive = true;
+  }
 
   //Networking
   //  compile dataDependencies.gson
