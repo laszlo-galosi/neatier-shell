@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -404,19 +405,58 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
         if (item.id == Item.EXT_INTENT) {
             Optional<String> actionOpt = event.getParamAs(EventParam.PRM_ACTION, String.class);
             Optional<String> urlOpt = event.getParamAs(EventParam.PRM_ITEM_URL, String.class);
-            if (actionOpt.isPresent() && urlOpt.isPresent()) {
+            Optional<String> contentOpt = event.getParamAs(EventParam.PRM_ITEM_TEXT, String.class);
+            Optional<String> typeOpt = event.getParamAs(EventParam.PRM_ITEM_TYPE, String.class);
+            Optional<Parcelable> extraOpt =
+                  event.getParamAs(EventParam.PRM_INTENT_EXTRAS, Parcelable.class);
+            if (actionOpt.isPresent()) {
                 String intentAction =
                       event.getCheckedParam(EventParam.PRM_ACTION, String.class).get();
-                Uri dataUri = Uri.parse(
-                      event.getCheckedParam(EventParam.PRM_ITEM_URL, String.class).get());
-                String type =
-                      event.getParamAs(EventParam.PRM_ITEM_TYPE, String.class, "text/plain")
-                           .get();
+                if (urlOpt.isPresent() && actionOpt.get().equals(WebViewFragment.TAG)) {
+                    addOrReplaceFragment(null, WebViewFragment.newInstance(
+                          getMetaData().put(EventParam.itemUrl().name, urlOpt.get())));
+                    return;
+                }
                 Intent intent = new Intent(intentAction);
-                intent.setDataAndType(dataUri, type);
-                startActivity(intent);
-                overridePendingTransition(R.anim.enter_from_left,
-                                          R.anim.exit_to_right);
+                if (urlOpt.isPresent()) {
+                    Uri dataUri = Uri.parse(urlOpt.get());
+                    if (typeOpt.isPresent()) {
+                        intent.setDataAndType(dataUri, typeOpt.get());
+                    } else {
+                        intent.setData(dataUri);
+                    }
+                }
+                if (contentOpt.isPresent()) {
+                    if (typeOpt.isPresent()) {
+                        intent.setType(typeOpt.get());
+                    }
+                    intent.putExtra(android.content.Intent.EXTRA_TEXT, contentOpt.get());
+                }
+                if (extraOpt.isPresent()) {
+                    intent.putExtras(((BundleWrapper) extraOpt.get()).getBundle());
+                }
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    Optional<Integer> requestCodeOpt =
+                          event.getParamAs(EventParam.PRM_REQUEST_CODE, Integer.class);
+                    if (requestCodeOpt.isPresent()) {
+                        int requestPermCode = requestCodeOpt.get();
+                        String permission;
+                        switch (requestPermCode) {
+                            case AppSettings.PENDING_CALL_REQUEST_CODE:
+                            default:
+                                permission = Manifest.permission.CALL_PHONE;
+                        }
+                        if (Build.VERSION.SDK_INT >= 21) {
+                            grantMePermission(intent, permission, requestPermCode);
+                        } else {
+                            startActivityForResult(intent, requestPermCode);
+                        }
+                    } else {
+                        startActivity(intent);
+                    }
+                    overridePendingTransition(R.anim.enter_from_right,
+                                              R.anim.exit_to_left);
+                }
             }
         }
     }

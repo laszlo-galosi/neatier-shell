@@ -29,7 +29,6 @@ import java.lang.annotation.RetentionPolicy;
 public class EventParam {
 
     public static final int PRM_VALUE = R.string.PRM_VALUE;
-    public static final int PRM_ERROR = R.string.PRM_ERROR;
     public static final int PRM_ITEM_ID = R.string.PRM_ITEM_ID;
     public static final int PRM_ITEM_POS = R.string.PRM_ITEM_POS;
     public static final int PRM_ITEM_TEXT = R.string.PRM_ITEM_TEXT;
@@ -43,6 +42,7 @@ public class EventParam {
     public static final int PRM_REQUEST_CODE = R.string.PRM_REQUEST_CODE;
     public static final int PRM_RESULT_CODE = R.string.PRM_RESULT_CODE;
     public static final int PRM_ACTION = R.string.PRM_ACTION;
+    public static final int PRM_INTENT_EXTRAS = R.string.PRM_INTENT_EXTRAS;
 
     private static SparseArray<EventParam> values;
 
@@ -56,6 +56,18 @@ public class EventParam {
             int id = sEventParamIds.getResourceId(i, -1);
             values.put(id, new EventParam(id, sEventParamIds.getString(i)));
         }
+    }
+
+    public static EventParam itemId() {
+        return find(PRM_ITEM_ID).get();
+    }
+
+    public static EventParam itemUrl() {
+        return find(PRM_ITEM_URL).get();
+    }
+
+    public static EventParam itemText() {
+        return find(PRM_ITEM_TEXT).get();
     }
 
     public static Optional<EventParam> find(int id) {
@@ -73,8 +85,8 @@ public class EventParam {
     }
 
     @EventParamId
-    int id;
-    String name;
+    public int id;
+    public String name;
 
     private EventParam(final int id, final String name) {
         this.id = id;
@@ -88,7 +100,7 @@ public class EventParam {
 
     @IntDef({ PRM_VALUE, PRM_ITEM_ID, PRM_ITEM_POS, PRM_ITEM_TEXT, PRM_ITEM_DATE, PRM_ITEM_TYPE,
                   PRM_ITEM_IMAGE, PRM_ITEM_THUMBNAIL, PRM_ITEM_COLOR, PRM_ITEM_URL, PRM_DETAILS,
-                  PRM_REQUEST_CODE, PRM_RESULT_CODE, PRM_ACTION
+                  PRM_REQUEST_CODE, PRM_RESULT_CODE, PRM_ACTION, PRM_INTENT_EXTRAS
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventParamId {

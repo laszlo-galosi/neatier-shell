@@ -59,6 +59,7 @@
     <item>@string/PRM_REQUEST_CODE</item>
     <item>@string/PRM_RESULT_CODE</item>
     <item>@string/PRM_ACTION</item>
+    <item>@string/PRM_INTENT_EXTRAS</item>
   </string-array>
 
   <string-array name="error_msgs"></string-array>
@@ -91,19 +92,20 @@
   <string name="EXT_INTENT" translatable="false">ExtIntent</string>
 
 
-  <string name="PRM_VALUE" translatable="false">PrmValue</string>
-  <string name="PRM_ERROR" translatable="false">PrmError</string>
-  <string name="PRM_ITEM_ID" translatable="false">PrmItemId</string>
-  <string name="PRM_ITEM_POS" translatable="false">PrmItemPos</string>
-  <string name="PRM_ITEM_TEXT" translatable="false">PrmItemText</string>
-  <string name="PRM_ITEM_DATE" translatable="false">PrmItemDate</string>
-  <string name="PRM_ITEM_TYPE" translatable="false">PrmItemType</string>
-  <string name="PRM_ITEM_IMAGE" translatable="false">PrmItemImage</string>
-  <string name="PRM_ITEM_THUMBNAIL" translatable="false">PrmItemThumbNail</string>
-  <string name="PRM_ITEM_COLOR" translatable="false">PrmItemColor</string>
-  <string name="PRM_ITEM_URL" translatable="false">PrmItemUrl</string>
-  <string name="PRM_DETAILS" translatable="false">PrmDetails</string>
-  <string name="PRM_REQUEST_CODE" translatable="false">PrmRequestCode</string>
-  <string name="PRM_RESULT_CODE" translatable="false">PrmResultCode</string>
-  <string name="PRM_ACTION" translatable="false">PrmAction</string>
+  <string name="PRM_VALUE" translatable="false">PRM_VALUE</string>
+  <string name="PRM_ERROR" translatable="false">PRM_ERROR</string>
+  <string name="PRM_ITEM_ID" translatable="false">PRM_ITEM_ID</string>
+  <string name="PRM_ITEM_POS" translatable="false">PRM_ITEM_POS</string>
+  <string name="PRM_ITEM_TEXT" translatable="false">PRM_ITEM_TEXT</string>
+  <string name="PRM_ITEM_DATE" translatable="false">PRM_ITEM_DATE</string>
+  <string name="PRM_ITEM_TYPE" translatable="false">PRM_ITEM_TYPE</string>
+  <string name="PRM_ITEM_IMAGE" translatable="false">PRM_ITEM_IMAGE</string>
+  <string name="PRM_ITEM_THUMBNAIL" translatable="false">PRM_ITEM_THUMBNAIL</string>
+  <string name="PRM_ITEM_COLOR" translatable="false">PRM_ITEM_COLOR</string>
+  <string name="PRM_ITEM_URL" translatable="false">PRM_ITEM_URL</string>
+  <string name="PRM_DETAILS" translatable="false">PRM_DETAILS</string>
+  <string name="PRM_REQUEST_CODE" translatable="false">PRM_REQUEST_CODE</string>
+  <string name="PRM_RESULT_CODE" translatable="false">PRM_RESULT_CODE</string>
+  <string name="PRM_ACTION" translatable="false">PRM_ACTION</string>
+  <string name="PRM_INTENT_EXTRAS" translatable="false">PRM_INTENT_EXTRAS</string>
 </resources>
