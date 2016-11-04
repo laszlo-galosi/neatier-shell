@@ -124,7 +124,7 @@ public class DeveloperSettingsModelImpl implements DeveloperSettingsModel {
         changePicassoLoggingEnabled(false);
         changeisAutoFillTestValuesEnabled(false);
         //Set whether RxLogger.logRxError call causes crashes the app or only logs to the err.
-        changeCrashOnRxLogEnabled(false);
+        changeCrashOnRxLogEnabled(true);
         //Change the HttpLogging level of RetroFit.
         changeHttpLoggingLevel(HttpLoggingInterceptor.Level.BODY);
     }

@@ -26,6 +26,8 @@ apply plugin: 'com.getkeepsafe.dexcount'
 //Retrolambda
 apply plugin: 'me.tatarka.retrolambda'
 
+apply plugin: 'android-apt'
+
 android {
   compileSdkVersion versions.androidCompileSdkVersion
   buildToolsVersion versions.androidBuildToolsVersion
@@ -146,11 +148,13 @@ dependencies {
 
   //    Optional, Collections, Guava like but lightweight on method count library
 
+  //  compile appBuildingDependencies.multidex
+
   //=======    dependency Injection Dagger 2 related
   apt appBuildingDependencies.daggerCompiler
   compile appBuildingDependencies.dagger
   compile appBuildingDependencies.javaxInject
-  //    compile appBuildingDependencies.javaxAnnotationApi
+
 
   //========    RxJava related libraries
   compile appBuildingDependencies.rxJava
@@ -161,7 +165,6 @@ dependencies {
   compile appBuildingDependencies.supportV7
   compile appBuildingDependencies.supportV4
   compile appBuildingDependencies.supportDesign
-  //  compile appBuildingDependencies.supportPercent
   //  compile appBuildingDependencies.supportPreference
   compile appBuildingDependencies.butterKnife
   apt appBuildingDependencies.butterKnifeCompiler
@@ -170,9 +173,11 @@ dependencies {
   compile appBuildingDependencies.trikitaLog
   compile appBuildingDependencies.arrow
   compile appBuildingDependencies.recyclerView
-  //  compile appBuildingDependencies.jodaTimeAndroid
+  compile appBuildingDependencies.jodaTimeAndroid
   compile appBuildingDependencies.picasso
   compile appBuildingDependencies.calligraphy
+  compile 'com.airbnb.android:epoxy:1.4.0'
+  apt 'com.airbnb.android:epoxy-processor:1.4.0'
 
   //Google play services
   compile appBuildingDependencies.fcm

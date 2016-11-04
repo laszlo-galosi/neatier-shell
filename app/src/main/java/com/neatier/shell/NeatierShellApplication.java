@@ -57,9 +57,7 @@ public class NeatierShellApplication extends Application
             MultiDex.install(this);
         }*/
 
-        applicationComponent = DaggerApplicationComponent.builder()
-                                                         .applicationModule(
-                                                               new ApplicationModule(this)).build();
+        applicationComponent = createComponent();
         applicationComponent.inject(this);
 
         //Initialize RxBus event constants.
@@ -96,6 +94,14 @@ public class NeatierShellApplication extends Application
     @NonNull
     public ApplicationComponent getComponent() {
         return applicationComponent;
+    }
+
+    @Override public ApplicationComponent createComponent() {
+        return prepareApplicationComponent().build();
+    }
+
+    @Override public void releaseComponent() {
+        applicationComponent = null;
     }
 
     /**

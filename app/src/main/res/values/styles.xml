@@ -34,6 +34,12 @@
     <item name="fontPath">fonts/Roboto-Light.ttf</item>
   </style>
 
+  <style name="AppTextView.normal.strong">
+    <item name="fontPath">fonts/Roboto-Medium.ttf</item>
+    <item name="android:textStyle">bold</item>
+  </style>
+
+
   <style name="AppTextView.menu">
     <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     <item name="android:textSize">14sp</item>

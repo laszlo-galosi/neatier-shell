@@ -16,12 +16,14 @@ package com.neatier.shell.internal.di;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.neatier.commons.helpers.JsonSerializer;
 import com.neatier.commons.helpers.SharedKeyValueStore;
 import com.neatier.shell.NeatierShellApplication;
 import com.neatier.shell.appframework.MultiFragmentActivity;
 import com.neatier.shell.data.network.di.HttpInterceptorModule;
 import com.neatier.shell.data.network.di.HttpNetworkModule;
 import com.neatier.shell.data.network.di.RestApiModule;
+import com.neatier.shell.data.repository.DataSources;
 import com.neatier.shell.factorysettings.developer.DeveloperSettings;
 import dagger.Component;
 import javax.inject.Singleton;
@@ -50,4 +52,8 @@ public interface ApplicationComponent {
     @NonNull DeveloperSettings developerSettings();
 
     SharedKeyValueStore<String, Object> settingsStore();
+
+    JsonSerializer jsonSerializer();
+
+    DataSources.SimpleApiResponseDataSource simpleApiResponseDataSource();
 }

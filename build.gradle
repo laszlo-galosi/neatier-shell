@@ -14,7 +14,7 @@ buildscript {
     classpath gradlePlugins.apt
     // Backport of some Java 8 language features such as Lambdas and method references.
     classpath gradlePlugins.retrolambda
-    // classpath gradlePlugins.androidDevMetrics
+    //Prints method count after the build completed.
     classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.0'
     //Frodo
     classpath 'com.fernandocejas.frodo:frodo-plugin:0.8.3'

@@ -48,6 +48,7 @@ import com.neatier.shell.eventbus.RxBus;
 import com.neatier.shell.exception.ErrorMessageFactory;
 import com.neatier.shell.exception.RxLogger;
 import com.neatier.shell.internal.di.HasComponent;
+import java.util.Arrays;
 import java.util.List;
 import rx.Observer;
 import rx.Subscriber;
@@ -396,7 +397,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     }
 
     @Override public void onUpdateFinished(Throwable... errors) {
-        Log.v(getFragmentTag(), "onUpdateFinished", errors);
+        Log.v(getFragmentTag(), "onUpdateFinished", Arrays.toString(errors));
         if (hasProgressView()) {
             hideProgress();
         }

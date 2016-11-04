@@ -14,9 +14,16 @@
 
 package com.neatier.shell.data.network;
 
+import com.google.gson.JsonElement;
+import com.neatier.commons.helpers.KeyValuePairs;
+import java.util.List;
+import rx.Observable;
+
 /**
  * RestApi for retrieving data from the network.
  */
 public interface RestApi {
+    Observable<JsonElement> listGames(KeyValuePairs<String, Object> requestParams,
+          List<String> optionalParamNames);
 }
 

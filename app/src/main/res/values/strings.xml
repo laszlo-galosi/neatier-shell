@@ -16,8 +16,8 @@
   <string name="snackbar_action_cancel">Cancel</string>
   <string name="snack_internal_error">Internal application error.</string>
   <string name="alert_title">Warning</string>The server is unreachable, please retry later.
-  <string name="navmenu_action_home">Home</string>
-  <string name="navmenu_action_settings">Settings</string>
+  <string name="action_home">Home</string>
+  <string name="action_settings">Settings</string>
   <string name="alert_title_request_permission">Permission request</string>
   <string name="snackbar_action_next">Next</string>
   <string name="snackbar_action_defer">Later</string>
@@ -35,4 +35,8 @@
     required.
   </string>
   <string name="fcm_message_default">Default push message</string>
+  <string name="action_xboxone">Xbox One</string>
+  <string name="action_xbox360">Xbox 360</string>
+  <string name="xboxapi_auth_key">38d8ead96600d97d348d5216dc44e3f8cf9343f2</string>
+  <string name="xboxapi_default_userid">2533274865118671</string>
 </resources>

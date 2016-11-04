@@ -16,11 +16,7 @@
 
 package com.neatier.shell.data.repository;
 
-import android.text.TextUtils;
-import com.google.gson.JsonObject;
-import com.neatier.commons.exception.ErrorBundleException;
-import com.neatier.commons.exception.RestApiResponseException;
-import com.neatier.commons.exception.RestApiResponseException.ErrorKind;
+import com.google.gson.JsonElement;
 import com.neatier.commons.helpers.JsonSerializer;
 import com.neatier.commons.helpers.KeyValuePairs;
 import com.neatier.shell.data.network.ApiSettings;
@@ -43,25 +39,11 @@ public class SimpleJsonResponseDataSource
     }
 
     @Override
-    public Observable getSimpleJsonResponse(final KeyValuePairs<String, Object> requestParams) {
+    public Observable<JsonElement> getSimpleJsonResponse(
+          final KeyValuePairs<String, Object> requestParams) {
         Log.d("getSimpleJsonResponse").v(requestParams);
-        Observable<JsonObject> responseObservable = Observable.error(new ErrorBundleException(
-              String.format("Unsupported API call: getSimpleJsonResponse:%s", requestParams)));
-        //Todo: implement api call logic by override responseObservable
-        return responseObservable.flatMap(respJson -> {
-            //Error message handling if there is any errorMessage in the response.
-            String errorMessage = serializer.getAsChecked(ApiSettings.PROP_ERROR_MESSAGE,
-                                                          respJson, String.class);
-            if (!TextUtils.isEmpty(errorMessage)) {
-                KeyValuePairs<String, Object> errorInfo = new KeyValuePairs<>();
-                ErrorKind errorKind = ErrorKind.find(ErrorKind.REQUEST).get();
-                errorInfo.put(RestApiResponseException.RESP_STATUS, new Integer(499))
-                         .put(RestApiResponseException.RESP_KIND, errorKind.id)
-                         .put(RestApiResponseException.RESP_REASON, errorKind.description)
-                         .put(RestApiResponseException.RESP_BODY, respJson);
-                return Observable.error(new RestApiResponseException(errorInfo));
-            }
-            return Observable.just(respJson);
-        });
+        Observable<JsonElement> responseObservable =
+              restApiClient.listGames(requestParams, ApiSettings.GAMES_PARAMS);
+        return responseObservable.flatMap(respJson -> Observable.just(respJson));
     }
 }

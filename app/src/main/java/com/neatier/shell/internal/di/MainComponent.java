@@ -17,6 +17,8 @@ package com.neatier.shell.internal.di;
 import com.neatier.shell.home.di.HomeComponent;
 import com.neatier.shell.home.di.HomeModule;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
+import com.neatier.shell.xboxgames.di.XboxComponent;
+import com.neatier.shell.xboxgames.di.XboxModule;
 import dagger.Component;
 
 /**
@@ -31,4 +33,6 @@ public interface MainComponent extends ActivityComponent {
     NavigationMenuPresenter navigationMenuPresenter();
 
     HomeComponent plus(HomeModule homeModule);
+
+    XboxComponent plus(XboxModule homeModule);
 }

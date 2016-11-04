@@ -583,7 +583,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
     public void switchToolbarTheme(final @DrawableRes int drawableRes) {
         @DrawableRes int navigationIconRes = shouldGoBack() ? R.drawable.ic_arrow_back_24dp
                                                             : drawableRes;
-        @ColorRes int colorRes = R.color.colorTextPrimary;
+        @ColorRes int colorRes = R.color.white;
         final Drawable navDrawable = DrawableHelper
               .withContext(MultiFragmentActivity.this)
               .withColorRes(colorRes)
@@ -592,6 +592,13 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
               .get();
         //ab.setHomeAsUpIndicator(drawable);
         mToolbar.setTitleTextColor(ContextCompat.getColor(this, colorRes));
+        mToolbarTitleAndLogo.setTextColor(ContextCompat.getColor(this, colorRes));
+        mToolbarTitleAndLogo.setCompoundDrawablesWithIntrinsicBounds(
+              DrawableHelper.withContext(this)
+                            .withColorRes(colorRes)
+                            .withDrawable(R.drawable.ic_xbox_24dp).tint().get(),
+              null, null, null
+        );
         mToolbar.setSubtitleTextColor(ContextCompat.getColor(this, colorRes));
         mToolbar.setNavigationIcon(navDrawable);
         mToolbar.setPopupTheme(R.style.AppPopup);

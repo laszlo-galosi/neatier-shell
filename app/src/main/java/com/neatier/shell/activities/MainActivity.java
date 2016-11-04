@@ -47,6 +47,7 @@ import com.neatier.shell.appframework.MultiFragmentActivity;
 import com.neatier.shell.appframework.Navigator;
 import com.neatier.shell.appframework.TaggedBaseFragment;
 import com.neatier.shell.appframework.helpers.DialogMaker;
+import com.neatier.shell.data.network.ApiSettings;
 import com.neatier.shell.eventbus.EventBuilder;
 import com.neatier.shell.eventbus.EventParam;
 import com.neatier.shell.eventbus.Item;
@@ -58,6 +59,7 @@ import com.neatier.shell.internal.di.MainComponent;
 import com.neatier.shell.internal.di.MainModule;
 import com.neatier.shell.navigation.NavigationMenuItemAdapter;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
+import com.neatier.shell.xboxgames.GameTitleTitleListFragment;
 import javax.inject.Inject;
 import trikita.log.Log;
 
@@ -66,16 +68,11 @@ public class MainActivity extends MultiFragmentActivity implements
                                                         AppMvp.LongTaskBaseView,
                                                         ViewTreeObserver.OnGlobalLayoutListener {
 
-    @BindView(R.id.mainLayout)
-    CoordinatorLayout mCoordinatorLayout;
-    @BindView(R.id.content_main)
-    View mMainContentView;
-    @BindView(R.id.nav_view)
-    NavigationView mNavigationView;
-    @BindView(R.id.drawer_layout)
-    DrawerLayout mDrawerLayout;
-    @BindView(R.id.nav_menu)
-    RecyclerView mNavMenuRecyclerView;
+    @BindView(R.id.mainLayout) CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.content_main) View mMainContentView;
+    @BindView(R.id.nav_view) NavigationView mNavigationView;
+    @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
+    @BindView(R.id.nav_menu) RecyclerView mNavMenuRecyclerView;
 
     @Inject
     NavigationMenuPresenter mNavigationMenuPresenter;
@@ -134,12 +131,7 @@ public class MainActivity extends MultiFragmentActivity implements
 
     private void initializeInjector() {
         mApiParams = new KeyValuePairs<>(2);
-        this.mainComponent = DaggerMainComponent.builder()
-                                                .applicationComponent(getApplicationComponent())
-                                                .activityModule(getActivityModule())
-                                                .mainModule(new MainModule(mApiParams,
-                                                                           new LongTaskOnIOScheduler()))
-                                                .build();
+        this.mainComponent = createComponent();
     }
 
     @Override
@@ -256,8 +248,21 @@ public class MainActivity extends MultiFragmentActivity implements
         if (item.id == Item.NAV_MENU_ITEM) {
             int itemId = event.getParamAs(EventParam.PRM_ITEM_ID, Integer.class, 0).get();
             switch (itemId) {
-                case R.id.action_home:
+               /* case R.id.action_home:
                     super.addOrReplaceFragment(null, HomeFragment.newInstance(getMetaData()));
+                    break;*/
+                case R.id.action_xboxone:
+                case R.id.action_xbox360:
+                    super.addOrReplaceFragment(
+                          null,
+                          GameTitleTitleListFragment.newInstance(getMetaData()
+                                                                       .put(ApiSettings
+                                                                                  .KEY_API_LIST_TYPE,
+                                                                            itemId
+                                                                                  == R.id
+                                                                                  .action_xbox360
+                                                                            ? ApiSettings.LIST_XBOX360
+                                                                            : ApiSettings.LIST_XBOXONE)));
                     break;
                 case R.id.action_settings:
                     break;
@@ -312,9 +317,23 @@ public class MainActivity extends MultiFragmentActivity implements
         return mainComponent;
     }
 
+    @Override public MainComponent createComponent() {
+        return DaggerMainComponent.builder()
+                                  .applicationComponent(getApplicationComponent())
+                                  .activityModule(getActivityModule())
+                                  .mainModule(new MainModule(mApiParams,
+                                                             new LongTaskOnIOScheduler()))
+                                  .build();
+    }
+
+    @Override public void releaseComponent() {
+        mainComponent = null;
+    }
+
     @Override public <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
           final BundleWrapper instanceBundleWrapper) {
-        return Optional.of((T) HomeFragment.newInstance(instanceBundleWrapper));
+        return Optional.of((T) GameTitleTitleListFragment.newInstance(
+              instanceBundleWrapper.put(ApiSettings.KEY_API_LIST_TYPE, ApiSettings.LIST_XBOXONE)));
     }
 
     public void setOnGestureListener(final GestureDetector.OnGestureListener gl) {

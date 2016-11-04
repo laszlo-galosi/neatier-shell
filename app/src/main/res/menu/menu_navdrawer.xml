@@ -13,14 +13,24 @@
   -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
   <group android:checkableBehavior="none">
+    <!--    <item
+            android:id="@+id/action_home"
+            android:title="@string/action_home"
+            android:icon="@drawable/ic_home_24dp"
+        />-->
     <item
-        android:id="@+id/action_home"
-        android:title="@string/navmenu_action_home"
-        android:icon="@drawable/ic_home_24dp"
+        android:id="@+id/action_xboxone"
+        android:title="@string/action_xboxone"
+        android:icon="@drawable/ic_xbox_24dp"
+    />
+    <item
+        android:id="@+id/action_xbox360"
+        android:title="@string/action_xbox360"
+        android:icon="@drawable/ic_xbox_24dp"
     />
     <item
         android:id="@+id/action_settings"
-        android:title="@string/navmenu_action_settings"
+        android:title="@string/action_settings"
         android:icon="@drawable/ic_settings_24dp"
     />
   </group>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#00BCD4</color>
-    <color name="colorPrimaryDark">#0097A7</color>
+    <color name="colorPrimary">#7eb900</color>
+    <color name="colorPrimaryDark">#578000</color>
     <color name="colorAccent">#283593</color>
-    <color name="colorSecondary">#B2EBF2</color>
+    <color name="colorSecondary">#d7d7d7</color>
 
     <color name="white">#ffffff</color>
     <color name="translucent_100">#00000000</color>
@@ -25,4 +25,5 @@
     <!--Normal and Night mode text color for primary and secondary -->
     <color name="colorTextPrimary">#3f474c</color>
     <color name="colorTextSecondary">#a1b5b2</color>
+    <color name="colorGold">#ffda44</color>
 </resources>

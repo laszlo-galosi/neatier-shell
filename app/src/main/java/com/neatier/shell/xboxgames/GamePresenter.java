@@ -12,16 +12,14 @@
  *   Delight Solutions Kft.
  */
 
-package com.neatier.shell.internal.di;
+package com.neatier.shell.xboxgames;
+
+import com.neatier.shell.appframework.AppMvp;
+import java.util.List;
 
 /**
- * Interface representing a contract for clients that contains a component for dependency
- * injection.
+ * Created by László Gálosi on 14/04/16
  */
-public interface HasComponent<C> {
-    C getComponent();
-
-    C createComponent();
-
-    void releaseComponent();
+public interface GamePresenter extends AppMvp.Presenter {
+    List<GameTitleView.GameTitleItemModel> getItems();
 }

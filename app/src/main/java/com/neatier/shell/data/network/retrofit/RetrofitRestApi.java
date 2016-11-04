@@ -20,10 +20,12 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.neatier.commons.exception.ErrorBundleException;
 import com.neatier.commons.exception.InternalErrorException;
 import com.neatier.commons.exception.NetworkConnectionException;
+import com.neatier.commons.exception.NullArgumentException;
 import com.neatier.commons.exception.RestApiResponseException;
 import com.neatier.commons.exception.RestApiResponseException.ErrorKind;
 import com.neatier.commons.helpers.BundleWrapper;
@@ -35,6 +37,10 @@ import com.neatier.shell.data.network.ApiSettings;
 import com.neatier.shell.data.network.RestApi;
 import com.neatier.shell.internal.di.PerActivity;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import javax.inject.Inject;
 import okhttp3.OkHttpClient;
 import retrofit2.Response;
@@ -80,6 +86,54 @@ public class RetrofitRestApi implements RestApi {
         this.mOkHttpClient = okHttpClient;
         this.mServiceFactory = serviceFactory;
         mSerializer = serviceFactory.getSerializer();
+    }
+
+    @Override
+    public Observable<JsonElement> listGames(final KeyValuePairs<String, Object> requestParams,
+          List<String> optionalParamNames) {
+        final String xUid = (String) requestParams.get(ApiSettings.KEY_API_XUID);
+        String lang =
+              (String) requestParams.getOrDefault(ApiSettings.KEY_API_LANG,
+                                                  Locale.getDefault().toString());
+        final String listType = (String) requestParams.getOrDefault(ApiSettings.KEY_API_LIST_TYPE,
+                                                                    ApiSettings
+                                                                          .LIST_LATEST_XBOXONE);
+        Map<String, Object> queryMap = new HashMap<>(optionalParamNames.size());
+        Observable.from(optionalParamNames)
+                  .filter(key -> requestParams.containsKey(key))
+                  .subscribe(key -> queryMap.put(key, requestParams.get(key)));
+        try {
+            if (isThereInternetConnection()) {
+                NeatierShellApiService service = mServiceFactory.create();
+                Observable<Result<JsonElement>> resultObservable = Observable.empty();
+                if (xUid == null) {
+                    resultObservable =
+                          service.listTitles(getXAuthHeader(requestParams), lang, listType,
+                                             queryMap);
+                } else {
+                    resultObservable =
+                          service.listUserTitles(getXAuthHeader(requestParams), lang, xUid,
+                                                 listType,
+                                                 queryMap);
+                }
+                return resultObservable.compose(transformResult())
+                                       .flatMap(responseObject -> checkErrorResponse(
+                                             responseObject.getAsJsonObject()
+                                       ));
+            }
+            return Observable.error(createRestApiResponseException(Result.error(
+                  new NetworkConnectionException("No internet connection detected"))));
+        } catch (ErrorBundleException e) {
+            return Observable.error(createRestApiResponseException(Result.error(e)));
+        }
+    }
+
+    private String getXAuthHeader(final KeyValuePairs<String, Object> requestParams)
+          throws ErrorBundleException {
+        String xAuth = (String) requestParams.getOrThrows(
+              ApiSettings.KEY_API_XAUTH,
+              new InternalErrorException(new NullArgumentException(ApiSettings.KEY_API_XAUTH)));
+        return xAuth;
     }
 
     private static BundleWrapper checkParams(final KeyValuePairs<String, Object> params,
@@ -147,7 +201,10 @@ public class RetrofitRestApi implements RestApi {
         if (TextUtils.isEmpty(errorMessage)) {
             return Observable.just(jsonRespObj);
         }
+        int errorCode =
+              mSerializer.getAsChecked(ApiSettings.PROP_ERROR_CODE, jsonRespObj, Integer.class);
         KeyValuePairs<String, Object> errorInfo = new KeyValuePairs<>()
+              .put(RESP_STATUS, errorCode)
               .put(RESP_KIND, ErrorKind.REQUEST)
               .put(RESP_REASON, errorMessage)
               .put(RESP_URL_FROM, mServerEndpoint.getUrl().toString())
