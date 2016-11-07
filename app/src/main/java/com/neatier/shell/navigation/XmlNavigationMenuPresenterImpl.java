@@ -63,7 +63,7 @@ public class XmlNavigationMenuPresenterImpl extends BasePresenterImpl
     private void buildStaticMenu(final Context context) {
         Menu menu = new MenuBuilder(context);
         MenuInflater mi = new MenuInflater(context);
-        mi.inflate(R.menu.menu_navdrawer, menu);
+        mi.inflate(R.menu.menu_navigation, menu);
         mMenuItems.clear();
         for (int i = 0; i < menu.size(); i++) {
             MenuItem subitem = menu.getItem(i);

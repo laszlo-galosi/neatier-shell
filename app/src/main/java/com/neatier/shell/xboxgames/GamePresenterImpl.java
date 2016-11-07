@@ -73,7 +73,12 @@ public class GamePresenterImpl extends BasePresenterImpl
                                    return Observable.range(0, titles.size())
                                                     .map(index -> titles.get(index)
                                                                         .getAsJsonObject())
-                                                    .flatMap(titleObj -> getModelItem(titleObj));
+                                                    .flatMap(titleObj -> {
+                                                        if (mView != null) {
+                                                            return getModelItem(titleObj);
+                                                        }
+                                                        return Observable.empty();
+                                                    });
                                }
                                return Observable.error(new UnsupportedOperationException(
                                      String.format("This request time not implemented yet.%s",
@@ -84,12 +89,9 @@ public class GamePresenterImpl extends BasePresenterImpl
                            .subscribe(new PresenterSubscriber<GameTitleView$GameTitleItemModel_>() {
                                @Override public void onCompleted() {
                                    super.onCompleted();
-                                   mView.onModelReady();
-                               }
-
-                               @Override public void onError(final Throwable e) {
-                                   super.onError(e);
-                                   mView.onUpdateFinished(e);
+                                   if (mView != null) {
+                                       mView.onModelReady();
+                                   }
                                }
 
                                @Override
@@ -103,10 +105,6 @@ public class GamePresenterImpl extends BasePresenterImpl
     @Override public void freeUpHeap() {
         super.freeUpHeap();
         mItemList.clear();
-    }
-
-    @Override public void pause() {
-        super.pause();
     }
 
     @Override public void destroy() {

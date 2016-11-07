@@ -21,12 +21,12 @@
     <item
         android:id="@+id/action_xboxone"
         android:title="@string/action_xboxone"
-        android:icon="@drawable/ic_xbox_24dp"
+        android:icon="@drawable/ic_xboxone_24dp"
     />
     <item
         android:id="@+id/action_xbox360"
         android:title="@string/action_xbox360"
-        android:icon="@drawable/ic_xbox_24dp"
+        android:icon="@drawable/ic_xboxone_24dp"
     />
     <item
         android:id="@+id/action_settings"

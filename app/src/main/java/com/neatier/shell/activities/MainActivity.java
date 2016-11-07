@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -48,6 +49,7 @@ import com.neatier.shell.appframework.Navigator;
 import com.neatier.shell.appframework.TaggedBaseFragment;
 import com.neatier.shell.appframework.helpers.DialogMaker;
 import com.neatier.shell.data.network.ApiSettings;
+import com.neatier.shell.eventbus.Event;
 import com.neatier.shell.eventbus.EventBuilder;
 import com.neatier.shell.eventbus.EventParam;
 import com.neatier.shell.eventbus.Item;
@@ -73,6 +75,7 @@ public class MainActivity extends MultiFragmentActivity implements
     @BindView(R.id.nav_view) NavigationView mNavigationView;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @BindView(R.id.nav_menu) RecyclerView mNavMenuRecyclerView;
+    @BindView(R.id.bottom_navigation_view) BottomNavigationView mBottomNavigationView;
 
     @Inject
     NavigationMenuPresenter mNavigationMenuPresenter;
@@ -110,6 +113,16 @@ public class MainActivity extends MultiFragmentActivity implements
         mNavigationMenuPresenter = getComponent().navigationMenuPresenter();
         mNavigationMenuPresenter.setView(this);
         setupNavigationView();
+
+        mBottomNavigationView.setOnNavigationItemSelectedListener(
+              item -> {
+                  handleNavigation(
+                        EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
+                                    .addParam(EventParam.PRM_ITEM_ID, item.getItemId())
+                  );
+                  return true;
+              }
+        );
 
         //Creating a main bundle for arguments.
         mMainBundle = BundleWrapper.wrap(new Bundle());
@@ -255,14 +268,12 @@ public class MainActivity extends MultiFragmentActivity implements
                 case R.id.action_xbox360:
                     super.addOrReplaceFragment(
                           null,
-                          GameTitleTitleListFragment.newInstance(getMetaData()
-                                                                       .put(ApiSettings
-                                                                                  .KEY_API_LIST_TYPE,
-                                                                            itemId
-                                                                                  == R.id
-                                                                                  .action_xbox360
-                                                                            ? ApiSettings.LIST_XBOX360
-                                                                            : ApiSettings.LIST_XBOXONE)));
+                          GameTitleTitleListFragment.newInstance(
+                                getMetaData().put(ApiSettings.KEY_API_LIST_TYPE,
+                                                  itemId == R.id.action_xbox360
+                                                  ? ApiSettings.LIST_XBOX360
+                                                  : ApiSettings.LIST_XBOXONE)
+                          ));
                     break;
                 case R.id.action_settings:
                     break;
@@ -271,6 +282,36 @@ public class MainActivity extends MultiFragmentActivity implements
             DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.i("onBackPressed", "from", mCurrentFragmentTag);
+        if (shouldGoBack()) {
+            super.onBackPressed();
+            return;
+        } else {
+            ////Remove all fragments until its the last one.
+            while (getSupportFragmentManager().getBackStackEntryCount() > 1) {
+                getSupportFragmentManager().popBackStackImmediate();
+            }
+        }
+        int backStackCount = getSupportFragmentManager().getBackStackEntryCount();
+        if (backStackCount == 1) {
+            super.onBackPressed();
+            finish();
+        }
+    }
+
+    @Override protected boolean shouldGoBack() {
+        Optional<String> currentFragmentTag = getLastXFragmentTagOnStack(1);
+        if (currentFragmentTag.isPresent()) {
+            TaggedBaseFragment fr =
+                  (TaggedBaseFragment) getSupportFragmentManager().findFragmentByTag(
+                        currentFragmentTag.get());
+            return fr != null && fr.shouldGoBack();
+        }
+        return super.shouldGoBack();
     }
 
     private void setupNavigationView() {

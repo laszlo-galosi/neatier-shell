@@ -596,7 +596,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
         mToolbarTitleAndLogo.setCompoundDrawablesWithIntrinsicBounds(
               DrawableHelper.withContext(this)
                             .withColorRes(colorRes)
-                            .withDrawable(R.drawable.ic_xbox_24dp).tint().get(),
+                            .withDrawable(R.drawable.ic_xboxone_24dp).tint().get(),
               null, null, null
         );
         mToolbar.setSubtitleTextColor(ContextCompat.getColor(this, colorRes));

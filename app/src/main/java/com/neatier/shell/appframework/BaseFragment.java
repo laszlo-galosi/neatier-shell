@@ -408,6 +408,10 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         }
     }
 
+    public boolean shouldGoBack() {
+        return false;
+    }
+
     public void hideSoftKeyboard(View view) {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
               Context.INPUT_METHOD_SERVICE);

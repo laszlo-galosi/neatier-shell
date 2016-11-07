@@ -11,47 +11,59 @@
   ~   Delight Solutions Kft.
   -->
 
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/main_appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:theme="@style/ThemeOverlay.Toolbar">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center|center_vertical"
-            android:duplicateParentState="true">
-
-            <include layout="@layout/widget_toolbar" />
-          <TextView
-              android:id="@+id/toolbar_title"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center|center_vertical"
-              android:gravity="left|center_vertical"
-              android:drawableLeft="@drawable/ic_xbox_24dp"
-              android:drawablePadding="8dp"
-              tools:text="@string/app_name"
-              style="@style/AppTextView.title"
-          />
-        </FrameLayout>
-
-    </android.support.design.widget.AppBarLayout>
+  <android.support.design.widget.AppBarLayout
+      android:id="@+id/main_appbar"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:clickable="true"
+      android:theme="@style/ThemeOverlay.Toolbar">
 
     <FrameLayout
-        android:id="@+id/content_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginTop="?attr/actionBarSize" />
+        android:layout_gravity="center|center_vertical"
+        android:duplicateParentState="true">
+
+      <include layout="@layout/widget_toolbar"/>
+      <TextView
+          android:id="@+id/toolbar_title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center|center_vertical"
+          android:gravity="left|center_vertical"
+          android:drawableLeft="@drawable/ic_xboxone_24dp"
+          android:drawablePadding="8dp"
+          tools:text="@string/app_name"
+          style="@style/AppTextView.title"
+      />
+    </FrameLayout>
+
+  </android.support.design.widget.AppBarLayout>
+
+  <FrameLayout
+      android:id="@+id/content_main"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_marginLeft="0dp"
+      android:layout_marginRight="0dp"
+      android:layout_marginTop="?attr/actionBarSize"/>
+  <android.support.design.widget.BottomNavigationView
+      android:id="@+id/bottom_navigation_view"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|center_horizontal"
+      app:itemBackground="@color/colorPrimary"
+      app:itemIconTint="@color/bottomnav_item_background"
+      app:itemTextColor="@color/bottomnav_item_background"
+      app:menu="@menu/menu_navigation"
+  />
 </android.support.design.widget.CoordinatorLayout>

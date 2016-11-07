@@ -28,6 +28,8 @@ public interface TaggedBaseFragment {
 
     boolean shouldShowLogoOnToolbar();
 
+    boolean shouldGoBack();
+
     List<Integer> getDisplayableToolbarIcons();
 
 }
