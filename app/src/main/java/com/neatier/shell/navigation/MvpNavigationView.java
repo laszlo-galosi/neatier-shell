@@ -21,6 +21,8 @@ import java.util.List;
 /**
  * Created by László Gálosi on 18/05/16
  */
-public interface NavigationView extends AppMvp.LongTaskBaseView {
+public interface MvpNavigationView extends AppMvp.LongTaskBaseView {
     List<MenuItem> getMenuItems();
+
+    int getMenuResource();
 }

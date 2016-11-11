@@ -17,6 +17,7 @@ package com.neatier.shell;
 import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.multidex.MultiDex;
 import com.neatier.shell.data.network.ApiSettings;
 import com.neatier.shell.data.network.di.HttpInterceptorModule;
 import com.neatier.shell.data.network.di.HttpNetworkModule;
@@ -53,13 +54,11 @@ public class NeatierShellApplication extends Application
     public void onCreate() {
         super.onCreate();
 
-/*        if (!isInUnitTests()) {
+        if (!isInUnitTests()) {
             MultiDex.install(this);
-        }*/
+        }
 
-        applicationComponent = DaggerApplicationComponent.builder()
-                                                         .applicationModule(
-                                                               new ApplicationModule(this)).build();
+        applicationComponent = createComponent();
         applicationComponent.inject(this);
 
         //Initialize RxBus event constants.
@@ -80,8 +79,13 @@ public class NeatierShellApplication extends Application
         developerSettingModel.get().apply();
     }
 
+    @Override
     @NonNull
-    protected DaggerApplicationComponent.Builder prepareApplicationComponent() {
+    public ApplicationComponent getComponent() {
+        return applicationComponent;
+    }
+
+    @Override public ApplicationComponent createComponent() {
         return DaggerApplicationComponent.builder()
                                          .applicationModule(new ApplicationModule(this))
                                          .restApiModule(
@@ -89,13 +93,12 @@ public class NeatierShellApplication extends Application
                                                      ApiSettings.DEFAULT_SERVER_ENDPOINT)
                                          )
                                          .httpNetworkModule(new HttpNetworkModule())
-                                         .httpInterceptorModule(new HttpInterceptorModule());
+                                         .httpInterceptorModule(new HttpInterceptorModule())
+                                         .build();
     }
 
-    @Override
-    @NonNull
-    public ApplicationComponent getComponent() {
-        return applicationComponent;
+    @Override public void releaseComponent() {
+        applicationComponent = null;
     }
 
     /**

@@ -135,7 +135,7 @@ public class HomeFragment extends BaseFragment implements
     @Override
     protected void initialize() {
         super.initialize();
-        createHomeComponent().inject(this);
+        createComponent().inject(this);
         //Now we hava a presenter...
         this.mHomePresenter.setView(this);
         loadStateArguments();
@@ -152,7 +152,7 @@ public class HomeFragment extends BaseFragment implements
         if (mHomePresenter != null) {
             mHomePresenter.destroy();
         }
-        releaseHomeComponent();
+        releaseComponent();
         super.onDestroy();
     }
 
@@ -187,11 +187,6 @@ public class HomeFragment extends BaseFragment implements
     @Override
     protected int getContentLayout() {
         return R.layout.fragment_home;
-    }
-
-    @Override
-    public String getToolbarTitle() {
-        return getString(R.string.app_name);
     }
 
     @Override
@@ -292,13 +287,13 @@ public class HomeFragment extends BaseFragment implements
         return homeComponent;
     }
 
-    public HomeComponent createHomeComponent() {
+    @Override public HomeComponent createComponent() {
         homeComponent = ((MainActivity) getActivity()).getComponent()
                                                       .plus(new HomeModule());
         return homeComponent;
     }
 
-    public void releaseHomeComponent() {
+    @Override public void releaseComponent() {
         homeComponent = null;
     }
 

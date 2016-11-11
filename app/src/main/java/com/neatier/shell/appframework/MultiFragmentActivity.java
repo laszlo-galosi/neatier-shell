@@ -43,14 +43,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.PermissionRequest;
-import android.widget.TextView;
+import android.widget.ImageView;
 import butterknife.BindView;
 import butterknife.Unbinder;
 import com.fernandocejas.arrow.optional.Optional;
@@ -122,7 +121,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
 
     @BindView(R.id.mainLayout) protected CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.main_appbar) protected AppBarLayout mAppBarLayout;
-    @BindView(R.id.toolbar_title) protected TextView mToolbarTitleAndLogo;
+    @BindView(R.id.toolbar_logo) protected ImageView mToolbarLogo;
 
     @Override protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -321,7 +320,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
                     Log.e(e);
                     dialogMaker.setMessageRes(R.string.snack_internal_error)
                                .positiveAction(R.string.snackbar_action_ok)
-                               .make(thisContext, mCoordinatorLayout);
+                               .make(thisContext, getSnackbarAnchorView());
                 }
 
                 @Override public void onNext(final EventBuilder event) {
@@ -373,29 +372,26 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override public void onBackStackChanged() {
         int stackSize = getSupportFragmentManager().getBackStackEntryCount();
         Log.d("onBackStackChanged", stackSize);
         if (stackSize == 0) {
-            switchToolbarTheme(R.drawable.ic_menu_24dp);
+            switchToolbarTheme(R.drawable.ic_menu_24dp, R.drawable.ic_arrow_back_24dp);
             mToolbar.setTitle(null);
             return;
         }
-        switchToolbarTheme(R.drawable.ic_menu_24dp);
         String fragmentTag =
               getSupportFragmentManager().getBackStackEntryAt(stackSize - 1).getName();
         Log.d("onBackStackChanged", "currentFragment", fragmentTag);
+        switchToolbarTheme(R.drawable.ic_menu_24dp, R.drawable.ic_arrow_back_24dp);
         mCurrentFragmentTag = fragmentTag;
         TaggedBaseFragment fragment =
               (TaggedBaseFragment) getSupportFragmentManager().findFragmentByTag(fragmentTag);
         if (fragment != null) {
             boolean showLogo = fragment.shouldShowLogoOnToolbar();
             String toolbarTitle = fragment.getToolbarTitle();
-            if (!showLogo && TextUtils.isEmpty(toolbarTitle)) {
-                mToolbar.setTitle(toolbarTitle);
-            }
-            WidgetUtils.setTextAndVisibilityOf(mToolbarTitleAndLogo, toolbarTitle, showLogo);
+            WidgetUtils.setVisibilityOf(mToolbarLogo, showLogo);
+            mToolbar.setTitle(toolbarTitle);
             setToolbarItems(fragment);
         }
     }
@@ -580,19 +576,22 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
         ft.commit();
     }
 
-    public void switchToolbarTheme(final @DrawableRes int drawableRes) {
-        @DrawableRes int navigationIconRes = shouldGoBack() ? R.drawable.ic_arrow_back_24dp
-                                                            : drawableRes;
+    public void switchToolbarTheme(final @DrawableRes int navIconRes,
+          final @DrawableRes int backIconRes) {
+        @DrawableRes int navigationIconRes = shouldGoBack() ? backIconRes
+                                                            : navIconRes;
         @ColorRes int colorRes = R.color.colorTextPrimary;
-        final Drawable navDrawable = DrawableHelper
-              .withContext(MultiFragmentActivity.this)
-              .withColorRes(colorRes)
-              .withDrawable(navigationIconRes)
-              .tint()
-              .get();
+        final Drawable navDrawable = navigationIconRes == 0
+                                     ? null : DrawableHelper
+                                           .withContext(this)
+                                           .withColorRes(colorRes)
+                                           .withDrawable(navigationIconRes)
+                                           .tint()
+                                           .get();
         //ab.setHomeAsUpIndicator(drawable);
-        mToolbar.setTitleTextColor(ContextCompat.getColor(this, colorRes));
-        mToolbar.setSubtitleTextColor(ContextCompat.getColor(this, colorRes));
+        int color = ContextCompat.getColor(this, colorRes);
+        mToolbar.setTitleTextColor(color);
+        mToolbar.setSubtitleTextColor(color);
         mToolbar.setNavigationIcon(navDrawable);
         mToolbar.setPopupTheme(R.style.AppPopup);
     }
@@ -622,7 +621,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
         if (showInAlert) {
             dialogMaker.makeAlert(this);
         } else {
-            dialogMaker.make(this, mCoordinatorLayout);
+            dialogMaker.make(this, getSnackbarAnchorView());
         }
     }
 
@@ -752,7 +751,7 @@ public abstract class MultiFragmentActivity extends AppCompatActivity
                                startActivity(intent);
                            }
                        })
-                       .make(this, mCoordinatorLayout);
+                       .make(this, getSnackbarAnchorView());
         }
     }
 

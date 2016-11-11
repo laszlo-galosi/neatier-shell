@@ -17,7 +17,7 @@
     android:layout_height="match_parent"
     android:gravity="left|center_vertical"
     tools:text="@string/lorem_ipsum"
-    android:drawableLeft="@drawable/ic_home_24dp"
+    tools:drawableLeft="@drawable/ic_home_24dp"
     android:paddingLeft="@dimen/material_padding"
     android:paddingRight="@dimen/material_padding"
     android:drawablePadding="32dp"

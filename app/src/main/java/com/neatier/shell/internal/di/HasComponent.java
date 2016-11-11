@@ -20,4 +20,8 @@ package com.neatier.shell.internal.di;
  */
 public interface HasComponent<C> {
     C getComponent();
+
+    C createComponent();
+
+    void releaseComponent();
 }

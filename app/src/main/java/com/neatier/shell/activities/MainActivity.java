@@ -26,6 +26,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
@@ -42,7 +43,6 @@ import com.neatier.commons.helpers.KeyValuePairs;
 import com.neatier.commons.helpers.LongTaskOnIOScheduler;
 import com.neatier.shell.NeatierShellApplication;
 import com.neatier.shell.R;
-import com.neatier.shell.appframework.AppMvp;
 import com.neatier.shell.appframework.MultiFragmentActivity;
 import com.neatier.shell.appframework.Navigator;
 import com.neatier.shell.appframework.TaggedBaseFragment;
@@ -56,14 +56,16 @@ import com.neatier.shell.internal.di.DaggerMainComponent;
 import com.neatier.shell.internal.di.HasComponent;
 import com.neatier.shell.internal.di.MainComponent;
 import com.neatier.shell.internal.di.MainModule;
+import com.neatier.shell.navigation.MvpNavigationView;
 import com.neatier.shell.navigation.NavigationMenuItemAdapter;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
+import java.util.List;
 import javax.inject.Inject;
 import trikita.log.Log;
 
 public class MainActivity extends MultiFragmentActivity implements
                                                         HasComponent<MainComponent>,
-                                                        AppMvp.LongTaskBaseView,
+                                                        MvpNavigationView,
                                                         ViewTreeObserver.OnGlobalLayoutListener {
 
     @BindView(R.id.mainLayout)
@@ -86,6 +88,10 @@ public class MainActivity extends MultiFragmentActivity implements
     private MainComponent mainComponent;
     private GestureDetectorCompat mGestureDetector;
     private NavigationMenuItemAdapter mNavMenuAdapter;
+
+    static {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
 
     /**
      * Static method returning a starter intent of this Activity, used by the {@link Navigator}.
@@ -134,12 +140,7 @@ public class MainActivity extends MultiFragmentActivity implements
 
     private void initializeInjector() {
         mApiParams = new KeyValuePairs<>(2);
-        this.mainComponent = DaggerMainComponent.builder()
-                                                .applicationComponent(getApplicationComponent())
-                                                .activityModule(getActivityModule())
-                                                .mainModule(new MainModule(mApiParams,
-                                                                           new LongTaskOnIOScheduler()))
-                                                .build();
+        this.mainComponent = createComponent();
     }
 
     @Override
@@ -245,7 +246,7 @@ public class MainActivity extends MultiFragmentActivity implements
 
     @Override
     public Context getContext() {
-        return null;
+        return this;
     }
 
     @Override
@@ -312,9 +313,30 @@ public class MainActivity extends MultiFragmentActivity implements
         return mainComponent;
     }
 
+    @Override public MainComponent createComponent() {
+        return DaggerMainComponent.builder()
+                                  .applicationComponent(getApplicationComponent())
+                                  .activityModule(getActivityModule())
+                                  .mainModule(new MainModule(mApiParams,
+                                                             new LongTaskOnIOScheduler()))
+                                  .build();
+    }
+
+    @Override public void releaseComponent() {
+        mainComponent = null;
+    }
+
     @Override public <T extends TaggedBaseFragment> Optional<T> getDefaultFragmentInstance(
           final BundleWrapper instanceBundleWrapper) {
         return Optional.of((T) HomeFragment.newInstance(instanceBundleWrapper));
+    }
+
+    @Override public List<MenuItem> getMenuItems() {
+        return mNavigationMenuPresenter.getMenuItems();
+    }
+
+    @Override public int getMenuResource() {
+        return R.menu.menu_navdrawer;
     }
 
     public void setOnGestureListener(final GestureDetector.OnGestureListener gl) {

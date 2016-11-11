@@ -22,6 +22,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -126,6 +128,26 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         Log.v(getFragmentTag(), "onViewCreated")
            .v("savedState:", savedInstanceState);
         super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_toolbar, menu);
+        ((MainActivity) getActivity()).setToolbarItems((TaggedBaseFragment) this);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+            case R.id.action_settings:
+            default:
+                EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
+                            .addParam(EventParam.PRM_ITEM_ID, item.getItemId())
+                            .send();
+        }
+        return true;
     }
 
     @CallSuper
@@ -321,6 +343,10 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
      */
     public String getToolbarTitle() {
         return "";
+    }
+
+    public boolean shouldGoBack() {
+        return false;
     }
 
     public abstract boolean hasProgressView();

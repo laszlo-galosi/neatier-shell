@@ -35,4 +35,5 @@
     required.
   </string>
   <string name="fcm_message_default">Default push message</string>
+  <string name="action_settings">Settings</string>
 </resources>
