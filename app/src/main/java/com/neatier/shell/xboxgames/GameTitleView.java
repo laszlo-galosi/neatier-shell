@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -75,13 +76,17 @@ public interface GameTitleView extends AppMvp.LongTaskBaseView {
             WidgetUtils.setTextOf(holder.mAchiView, achivement);
             try {
                 int widthPx = context.getResources().getDimensionPixelSize(R.dimen.card_width);
-                Uri uri = Uri.parse(imageUrl);
-                picassoInstance.load(uri)
-                               .centerCrop()
-                               .resize(widthPx, widthPx)
-                               .error(R.drawable.img_placeholder)
-                               .placeholder(R.drawable.img_placeholder)
-                               .into(holder);
+                if (!TextUtils.isEmpty(imageUrl)) {
+                    Uri uri = Uri.parse(imageUrl);
+                    picassoInstance.load(uri)
+                                   .centerCrop()
+                                   .resize(widthPx, widthPx)
+                                   .error(R.drawable.img_placeholder)
+                                   .placeholder(R.drawable.img_placeholder)
+                                   .into(holder);
+                } else {
+                    holder.mItemImageView.setImageResource(R.drawable.img_placeholder);
+                }
             } catch (final Exception ex) {
                 Log.e("Failed to load Bitmap from resource", imageUrl, ex);
             }

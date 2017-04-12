@@ -31,7 +31,9 @@ public class EventParam {
     public static final int PRM_VALUE = R.string.PRM_VALUE;
     public static final int PRM_ITEM_ID = R.string.PRM_ITEM_ID;
     public static final int PRM_ITEM_POS = R.string.PRM_ITEM_POS;
+    public static final int PRM_ITEM_TITLE = R.string.PRM_ITEM_TITLE;
     public static final int PRM_ITEM_TEXT = R.string.PRM_ITEM_TEXT;
+    public static final int PRM_ITEM_TAG = R.string.PRM_ITEM_TAG;
     public static final int PRM_ITEM_DATE = R.string.PRM_ITEM_DATE;
     public static final int PRM_ITEM_TYPE = R.string.PRM_ITEM_TYPE;
     public static final int PRM_ITEM_IMAGE = R.string.PRM_ITEM_IMAGE;
@@ -40,9 +42,13 @@ public class EventParam {
     public static final int PRM_ITEM_URL = R.string.PRM_ITEM_URL;
     public static final int PRM_DETAILS = R.string.PRM_DETAILS;
     public static final int PRM_REQUEST_CODE = R.string.PRM_REQUEST_CODE;
+    public static final int PRM_FORCE_REQUEST = R.string.PRM_FORCE_REQUEST;
     public static final int PRM_RESULT_CODE = R.string.PRM_RESULT_CODE;
     public static final int PRM_ACTION = R.string.PRM_ACTION;
     public static final int PRM_INTENT_EXTRAS = R.string.PRM_INTENT_EXTRAS;
+    public static final int PRM_EXT_INTENT = R.string.PRM_EXT_INTENT;
+    public static final int PRM_CONTENT_LAYOUT = R.string.PRM_CONTENT_LAYOUT;
+    public static final int PRM_WIDGET_LAYOUT = R.string.PRM_WIDGET_LAYOUT;
 
     private static SparseArray<EventParam> values;
 
@@ -62,12 +68,44 @@ public class EventParam {
         return find(PRM_ITEM_ID).get();
     }
 
+    public static EventParam value() {
+        return find(PRM_VALUE).get();
+    }
+
     public static EventParam itemUrl() {
         return find(PRM_ITEM_URL).get();
     }
 
     public static EventParam itemText() {
         return find(PRM_ITEM_TEXT).get();
+    }
+
+    public static EventParam itemTitle() {
+        return find(PRM_ITEM_TITLE).get();
+    }
+
+    public static EventParam itemTag() {
+        return find(PRM_ITEM_TAG).get();
+    }
+
+    public static EventParam itemImage() {
+        return find(PRM_ITEM_IMAGE).get();
+    }
+
+    public static EventParam requestCode() {
+        return find(PRM_REQUEST_CODE).get();
+    }
+
+    public static EventParam resultCode() {
+        return find(PRM_RESULT_CODE).get();
+    }
+
+    public static EventParam intentExtras() {
+        return find(PRM_INTENT_EXTRAS).get();
+    }
+
+    public static EventParam externalIntent() {
+        return find(PRM_EXT_INTENT).get();
     }
 
     public static Optional<EventParam> find(int id) {
@@ -98,11 +136,15 @@ public class EventParam {
         return name;
     }
 
-    @IntDef({ PRM_VALUE, PRM_ITEM_ID, PRM_ITEM_POS, PRM_ITEM_TEXT, PRM_ITEM_DATE, PRM_ITEM_TYPE,
+    @IntDef({ PRM_VALUE, PRM_ITEM_ID, PRM_ITEM_POS, PRM_ITEM_TITLE, PRM_ITEM_TEXT, PRM_ITEM_TAG,
+                  PRM_ITEM_DATE, PRM_ITEM_TYPE,
                   PRM_ITEM_IMAGE, PRM_ITEM_THUMBNAIL, PRM_ITEM_COLOR, PRM_ITEM_URL, PRM_DETAILS,
-                  PRM_REQUEST_CODE, PRM_RESULT_CODE, PRM_ACTION, PRM_INTENT_EXTRAS
+                  PRM_REQUEST_CODE, PRM_RESULT_CODE, PRM_FORCE_REQUEST, PRM_ACTION,
+                  PRM_INTENT_EXTRAS, PRM_EXT_INTENT,
+                  PRM_WIDGET_LAYOUT, PRM_CONTENT_LAYOUT
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventParamId {
     }
 }
+

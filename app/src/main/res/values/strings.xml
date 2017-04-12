@@ -27,6 +27,11 @@
   <string name="message_permission_required">Permission is required, explain it to
     your users why.
   </string>
+
+  <string name="message_location_permission_required">Helyadatok hozzáférése szükséges. A Tovább-ra
+    koppintva engedélyezheted.
+  </string>
+  <string name="message_location_permission_not_granted">Helyadatok hozzáférése szükséges.</string>
   <string name="exception_message_authentication">Authentication error</string>
   <string name="message_read_ext_storage_permission_required">In order to ... we need your
     permission to access external storage.
@@ -34,9 +39,25 @@
   <string name="message_read_ext_storage_permission_not_granted">External storage access permission
     required.
   </string>
+  <string name="message_camera_permission_not_granted">A szükséges engedélyek hiányában a kamera nem
+    használható.
+  </string>
+  <string name="message_capture_image_permission_required">Kép készítéséhez kamera hozzáférés
+    szükséges. A Tovább-ra koppintva megadhatod a szükséges engedélyeket.
+  </string>
+  <string name="message_capture_video_permission_required">Videó készítéséhez kamera hozzáférés
+    szükséges. A Tovább-ra koppintva megadhatod a szükséges engedélyeket.
+  </string>
+  <string name="message_call_permission_required">A szám hívásához szükségünk van hívási engedélyre.
+    A tovább gombra koppintva engedélyezheted.
+  </string>
+  <string name="message_call_permission_not_granted">Hívási engedély szükséges.</string>
+
   <string name="fcm_message_default">Default push message</string>
   <string name="action_xboxone">Xbox One</string>
   <string name="action_xbox360">Xbox 360</string>
   <string name="xboxapi_auth_key">38d8ead96600d97d348d5216dc44e3f8cf9343f2</string>
   <string name="xboxapi_default_userid">2533274865118671</string>
+  <string name="action_info">Info</string>
+  <string name="select_picture">Capture or select a picture</string>
 </resources>

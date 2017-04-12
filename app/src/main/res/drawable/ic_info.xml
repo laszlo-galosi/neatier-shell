@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:viewportWidth="22"
+    android:viewportHeight="22"
+    android:width="22dp"
+    android:height="22dp">
+  <group
+      android:translateX="-20"
+      android:translateY="-36">
+    <path
+        android:pathData="M31 58C37.07513 58 42 53.07513 42 47C42 40.92487 37.07513 36 31 36C24.92487 36 20 40.92487 20 47C20 53.07513 24.92487 58 31 58ZM29 44.5L29 45L30 45L30 52.5L29 52.5L29 53L33 53L33 52.5L32 52.5L32 44.5L29 44.5ZM30.75 43C31.44036 43 32 42.44036 32 41.75C32 41.05964 31.44036 40.5 30.75 40.5C30.05964 40.5 29.5 41.05964 29.5 41.75C29.5 42.44036 30.05964 43 30.75 43ZM31 57C25.47715 57 21 52.52285 21 47C21 41.47715 25.47715 37 31 37C36.52285 37 41 41.47715 41 47C41 52.52285 36.52285 57 31 57Z"
+        android:fillColor="#3f474c"/>
+  </group>
+</vector>

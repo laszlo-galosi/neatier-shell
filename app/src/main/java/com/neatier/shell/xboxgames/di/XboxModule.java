@@ -21,7 +21,7 @@ public class XboxModule {
 
     @Provides @PerScreen
     GamePresenter provideGameTitlePresenter(
-          final DataSources.SimpleApiResponseDataSource apiDataSource, JsonSerializer serializer) {
+          final DataSources.SimpleJsonResponseDataSource apiDataSource, JsonSerializer serializer) {
         return new GamePresenterImpl(apiDataSource, serializer);
     }
 

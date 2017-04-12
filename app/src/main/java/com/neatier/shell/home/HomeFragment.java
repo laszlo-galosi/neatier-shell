@@ -224,11 +224,6 @@ public class HomeFragment extends BaseFragment implements
     }
 
     @Override
-    public Context getContext() {
-        return getActivity();
-    }
-
-    @Override
     public void onItemClicked(final RecyclerView recyclerView, final int position, final View v) {
         Log.d("onItemClicked", position);
         Preconditions.checkArgument(v.getTag() != null && v.getTag() instanceof EventBuilder,

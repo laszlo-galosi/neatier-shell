@@ -25,7 +25,7 @@ import rx.subjects.Subject;
 /**
  * Created by László Gálosi on 27/03/16
  */
-public class RxBus {
+public class RxBus implements EventDeliverable<EventBuilder> {
 
     // If multiple threads are going to emit events to this
     // then it must be made thread-safe like this instead
@@ -51,17 +51,21 @@ public class RxBus {
         return send(EventBuilder.withItemAndType(itemId, eventType));
     }
 
-    //@RxLogObservable
-    public Observable<EventBuilder> toObservable() {
-        return mBus;
-    }
-
     public boolean hasObservers() {
         return mBus.hasObservers();
     }
 
+    @Override public void deliver(final EventBuilder event) {
+        send(event);
+    }
+
     //@RxLogObservable
-    public Observable<EventBuilder> toObservable(
+    @Override public Observable<EventBuilder> toObservable() {
+        return mBus;
+    }
+
+    //@RxLogObservable
+    @Override public Observable<EventBuilder> toObservable(
           @Nullable Func1<EventBuilder, Boolean> filterFunction) {
         return mBus.filter(filterFunction);
     }

@@ -26,4 +26,5 @@
     <color name="colorTextPrimary">#3f474c</color>
     <color name="colorTextSecondary">#a1b5b2</color>
     <color name="colorGold">#ffda44</color>
+  <color name="field_error">#e53935</color>
 </resources>

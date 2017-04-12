@@ -44,6 +44,11 @@ public class Event {
     public static final int EVT_PREF_CHANGED = R.string.EVT_PREF_CHANGED;
     public static final int EVT_SEND = R.string.EVT_SEND;
     public static final int EVT_RESULT = R.string.EVT_RESULT;
+    public static final int EVT_USER_LOGIN = R.string.EVT_USER_LOGIN;
+    public static final int EVT_USER_LOGOUT = R.string.EVT_USER_LOGOUT;
+    public static final int EVT_REQUIRE_PERMISSION = R.string.EVT_REQUIRE_PERMISSION;
+    public static final int EVT_CONNECT = R.string.EVT_CONNECT;
+    public static final int EVT_CANCEL_UPLOAD = R.string.EVT_CANCEL_UPLOAD;
 
     private static SparseArray<Event> values;
 
@@ -77,7 +82,8 @@ public class Event {
 
     @IntDef({ EVT_UNKNOWN, EVT_NAVIGATE, EVT_RENDER, EVT_SHOW_HIDE, EVT_DIALOG, EVT_INTERNAL_ERROR,
                   EVT_MESSAGE, EVT_CLICK, EVT_LONGCLICK, EVT_ITEM_ADDED, EVT_ITEM_CHANGED,
-                  EVT_ITEM_REMOVED, EVT_PREF_CHANGED, EVT_SEND, EVT_RESULT })
+                  EVT_ITEM_REMOVED, EVT_PREF_CHANGED, EVT_SEND, EVT_RESULT, EVT_USER_LOGIN,
+                  EVT_USER_LOGOUT, EVT_REQUIRE_PERMISSION, EVT_CONNECT, EVT_CANCEL_UPLOAD })
     @Retention(RetentionPolicy.SOURCE)
     /**
      * {@link InDef} annotation for identifying unique app events.

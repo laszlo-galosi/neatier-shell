@@ -21,7 +21,8 @@ import com.google.gson.JsonParser;
 import com.neatier.commons.helpers.JsonSerializer;
 import com.neatier.data.entity.AutoValueAdapterFactory;
 import com.neatier.shell.data.network.RestApi;
-import com.neatier.shell.data.repository.SimpleJsonResponseDataSource;
+import com.neatier.shell.data.repository.DataSources;
+import com.neatier.shell.data.repository.SimpleJsonResponseApiDataSource;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;
@@ -45,9 +46,9 @@ public class SimpleApiModule {
     }
 
     @Provides @NonNull
-    public SimpleJsonResponseDataSource provideSimnpleApiDataSource(RestApi restApi,
+    public DataSources.SimpleJsonResponseDataSource provideSimnpleApiDataSource(RestApi restApi,
           @Named("simpleApiSerializer") JsonSerializer serializer) {
-        return new SimpleJsonResponseDataSource(restApi, serializer);
+        return new SimpleJsonResponseApiDataSource(restApi, serializer);
     }
 }
 

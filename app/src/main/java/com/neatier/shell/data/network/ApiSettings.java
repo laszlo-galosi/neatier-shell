@@ -42,9 +42,11 @@ public class ApiSettings {
     public static final String LIST_XBOX360 = "xbox360games";
     public static final String LIST_LATEST_XBOXONE = "latest-xboxone-games";
     public static final String LIST_LATEST_XBOX360 = "latest-xbox360-games";
+    public static final String ACTION_LIST_GAMES = "ListGames";
     public static final List<String> GAMES_PARAMS = Lists.newArrayList("sort");
 
     public static final String API_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSZ";
+    public static final String KEY_API_ACTION = "ApiAction";
 
     //Api related constants.
 

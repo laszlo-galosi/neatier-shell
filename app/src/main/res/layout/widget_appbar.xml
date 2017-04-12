@@ -20,6 +20,7 @@
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
+
   <android.support.design.widget.AppBarLayout
       android:id="@+id/main_appbar"
       android:layout_width="match_parent"
@@ -34,16 +35,12 @@
         android:duplicateParentState="true">
 
       <include layout="@layout/widget_toolbar"/>
-      <TextView
-          android:id="@+id/toolbar_title"
+      <ImageView
+          android:id="@+id/toolbar_logo"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_gravity="center|center_vertical"
-          android:gravity="left|center_vertical"
-          android:drawableLeft="@drawable/ic_xboxone_24dp"
-          android:drawablePadding="8dp"
-          tools:text="@string/app_name"
-          style="@style/AppTextView.title"
+          app:srcCompat="@drawable/ic_neat_logo"
       />
     </FrameLayout>
 

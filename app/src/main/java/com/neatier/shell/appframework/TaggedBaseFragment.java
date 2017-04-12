@@ -22,13 +22,15 @@ import java.util.List;
 public interface TaggedBaseFragment {
     String ARG_CURRENT_FRAGMENT_TAG = "CurrentFragmentTag";
 
+    boolean shouldGoBack();
+
     String getFragmentTag();
 
     String getToolbarTitle();
 
-    boolean shouldShowLogoOnToolbar();
+    boolean shouldShowToolbar();
 
-    boolean shouldGoBack();
+    boolean shouldShowLogoOnToolbar();
 
     List<Integer> getDisplayableToolbarIcons();
 

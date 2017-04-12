@@ -55,5 +55,5 @@ public interface ApplicationComponent {
 
     JsonSerializer jsonSerializer();
 
-    DataSources.SimpleApiResponseDataSource simpleApiResponseDataSource();
+    DataSources.SimpleJsonResponseDataSource simpleApiResponseDataSource();
 }

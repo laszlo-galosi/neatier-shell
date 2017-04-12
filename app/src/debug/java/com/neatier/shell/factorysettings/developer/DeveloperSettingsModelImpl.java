@@ -15,6 +15,7 @@
 package com.neatier.shell.factorysettings.developer;
 
 import android.app.Application;
+import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import com.crashlytics.android.Crashlytics;
 import com.neatier.shell.BuildConfig;
@@ -37,13 +38,7 @@ public class DeveloperSettingsModelImpl implements DeveloperSettingsModel {
     private final LeakCanaryProxy leakCanaryProxy;
 
     @NonNull
-    private AtomicBoolean stethoAlreadyEnabled = new AtomicBoolean();
-
-    @NonNull
     private AtomicBoolean leakCanaryAlreadyEnabled = new AtomicBoolean();
-
-    @NonNull
-    private AtomicBoolean tinyDancerDisplayed = new AtomicBoolean();
 
     public DeveloperSettingsModelImpl(@NonNull Application application,
           @NonNull DeveloperSettings developerSettings,
@@ -63,69 +58,59 @@ public class DeveloperSettingsModelImpl implements DeveloperSettingsModel {
         return BuildConfig.VERSION_NAME;
     }
 
-    public boolean isLeakCanaryEnabled() {
-        return developerSettings.isLeakCanaryEnabled();
-    }
-
-    public void changeLeakCanaryState(boolean enabled) {
-        developerSettings.saveIsLeakCanaryEnabled(enabled);
-        apply();
-    }
-
-    public boolean isPicassoIndicatorEnabled() {
-        return developerSettings.isPicassoIndicatorEnabled();
-    }
-
-    public void changePicassoIndicatorState(boolean enabled) {
-        developerSettings.savePicassoIndicatorEnabled(enabled);
-    }
-
-    public boolean isCrashlyticsEnabled() {
-        return developerSettings.isCrashlyticsEnabled();
-    }
-
-    public void changeCrashlyticsState(boolean enabled) {
-        developerSettings.saveIsCrashlyticsEnabled(enabled);
-    }
-
-    public void changeisAutoFillTestValuesEnabled(boolean enabled) {
-        developerSettings.saveAutoFillTestValuesEnabled(enabled);
-    }
-
-    public void changePicassoLoggingEnabled(boolean enabled) {
-        developerSettings.savePicassoLoggingEnabled(enabled);
-    }
-
-    public void changeHttpLoggingLevel(HttpLoggingInterceptor.Level level) {
-        developerSettings.saveHttpLoggingLevel(level);
-    }
-
-    public void changeCrashOnRxLogEnabled(boolean enabled) {
-        developerSettings.saveCrashOnRxLogEnabled(enabled);
-    }
-
     @Override
     public void apply() {
         // LeakCanary can not be enabled twice.
         if (leakCanaryAlreadyEnabled.compareAndSet(false, true)) {
             //Todo: set from Developer Settings UI instead of enabling from default.
-            changeLeakCanaryState(true);
-            if (isLeakCanaryEnabled()) {
+            developerSettings.setLeakCanaryEnabled(false);
+            if (developerSettings.isLeakCanaryEnabled()) {
                 leakCanaryProxy.init();
             }
         }
-        changeCrashlyticsState(false);
-        if (isCrashlyticsEnabled()) {
+        developerSettings.setIsCrashlyticsEnabled(false);
+        if (developerSettings.isCrashlyticsEnabled()) {
             Fabric.with(application, new Crashlytics());
         }
+        developerSettings.setCrashOnRxLogEnabled(true);
+
         //Enables showing Picasso indicators of loaded image (network/disk/memory)
-        changePicassoIndicatorState(true);
+        developerSettings.setPicassoIndicatorEnabled(true);
         //Enables Picasso logging of loading images.
-        changePicassoLoggingEnabled(false);
-        changeisAutoFillTestValuesEnabled(false);
+        developerSettings.setPicassoLoggingEnabled(false);
+        developerSettings.setAutoFillTestValuesEnabled(false);
         //Set whether RxLogger.logRxError call causes crashes the app or only logs to the err.
-        changeCrashOnRxLogEnabled(true);
+        //Force portrait orientation
+        developerSettings.setForcePortraitOrientation(true);
+        //Show/hide debug views
+        developerSettings.setShowDebugViews(false);
         //Change the HttpLogging level of RetroFit.
-        changeHttpLoggingLevel(HttpLoggingInterceptor.Level.BODY);
+        developerSettings.setHttpLoggingLevel(HttpLoggingInterceptor.Level.BODY);
+        //Strict mode  programming mistakes early warnings.
+        developerSettings.setStrictModeEbabled(false);
+        if (developerSettings.isStrictModeEnabled()) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                                             .detectDiskReads()
+                                             .detectDiskWrites()
+                                             .detectNetwork()   // or .detectAll() for all
+                                             // detectable problems
+                                             .penaltyLog()
+                                             .penaltyFlashScreen()
+                                             .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                                         .detectLeakedClosableObjects()
+                                         .detectLeakedRegistrationObjects()
+                                         .detectActivityLeaks()
+                                         .penaltyLog()
+                                         //.penaltyDeath()
+                                         .build());
+        }
+
+        //Setup initial preferences.
+        //Minimal settings required for default function
+        //Developer settings for testing purpose.
+        //developerSettings
+        //      .clearPref(PrefKey.userProfile())
+        ;
     }
 }

@@ -17,11 +17,12 @@ package com.neatier.shell;
 import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.multidex.MultiDex;
+import android.support.v7.app.AppCompatDelegate;
 import com.neatier.shell.data.network.ApiSettings;
 import com.neatier.shell.data.network.di.HttpInterceptorModule;
 import com.neatier.shell.data.network.di.HttpNetworkModule;
 import com.neatier.shell.data.network.di.RestApiModule;
-import com.neatier.shell.eventbus.RxBus;
 import com.neatier.shell.exception.RxLogger;
 import com.neatier.shell.factorysettings.AppSettings;
 import com.neatier.shell.factorysettings.developer.DeveloperSettingsModel;
@@ -50,18 +51,20 @@ public class NeatierShellApplication extends Application
     }
 
     @Override
+    protected void attachBaseContext(Context context) {
+        super.attachBaseContext(context);
+        if (!isInUnitTests()) {
+            MultiDex.install(this);
+        }
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 
-/*        if (!isInUnitTests()) {
-            MultiDex.install(this);
-        }*/
-
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         applicationComponent = createComponent();
         applicationComponent.inject(this);
-
-        //Initialize RxBus event constants.
-        RxBus.initConstants(this);
         //Initialize Enum-like factory settings constant classes.
         AppSettings.init(this);
 

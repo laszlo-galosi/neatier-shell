@@ -29,6 +29,11 @@
     <item>@string/EVT_PREF_CHANGED</item>
     <item>@string/EVT_SEND</item>
     <item>@string/EVT_RESULT</item>
+    <item>@string/EVT_USER_LOGIN</item>
+    <item>@string/EVT_USER_LOGOUT</item>
+    <item>@string/EVT_REQUIRE_PERMISSION</item>
+    <item>@string/EVT_CONNECT</item>
+    <item>@string/EVT_CANCEL_UPLOAD</item>
   </string-array>
 
   <string-array name="item_ids">
@@ -41,6 +46,9 @@
     <item>@string/DIALOG</item>
     <item>@string/PUSH_NOTIFICATION</item>
     <item>@string/EXT_INTENT</item>
+    <item>@string/CAMERA</item>
+    <item>@string/SOFT_KEYBOARD</item>
+    <item>@string/PROGRESS</item>
   </string-array>
 
   <string-array name="event_params">
@@ -48,7 +56,9 @@
     <item>@string/PRM_ERROR</item>
     <item>@string/PRM_ITEM_ID</item>
     <item>@string/PRM_ITEM_POS</item>
+    <item>@string/PRM_ITEM_TITLE</item>
     <item>@string/PRM_ITEM_TEXT</item>
+    <item>@string/PRM_ITEM_TAG</item>
     <item>@string/PRM_ITEM_DATE</item>
     <item>@string/PRM_ITEM_TYPE</item>
     <item>@string/PRM_ITEM_IMAGE</item>
@@ -57,9 +67,13 @@
     <item>@string/PRM_ITEM_URL</item>
     <item>@string/PRM_DETAILS</item>
     <item>@string/PRM_REQUEST_CODE</item>
+    <item>@string/PRM_FORCE_REQUEST</item>
     <item>@string/PRM_RESULT_CODE</item>
     <item>@string/PRM_ACTION</item>
     <item>@string/PRM_INTENT_EXTRAS</item>
+    <item>@string/PRM_EXT_INTENT</item>
+    <item>@string/PRM_WIDGET_LAYOUT</item>
+    <item>@string/PRM_CONTENT_LAYOUT</item>
   </string-array>
 
   <string-array name="error_msgs"></string-array>
@@ -79,6 +93,11 @@
   <string name="EVT_PREF_CHANGED" translatable="false">UserPrefsChannged</string>
   <string name="EVT_SEND" translatable="false">EventSend</string>
   <string name="EVT_RESULT" translatable="false">EventResult</string>
+  <string name="EVT_USER_LOGIN" translatable="false">EventUserLogin</string>
+  <string name="EVT_USER_LOGOUT" translatable="false">EventUserLogout</string>
+  <string name="EVT_REQUIRE_PERMISSION" translatable="false">EventRequirePermission</string>
+  <string name="EVT_CONNECT" translatable="false">EventConnect</string>
+  <string name="EVT_CANCEL_UPLOAD" translatable="false">EventCancelUpload</string>
 
   <string name="UNKNOWN_ITEM" translatable="false">Unknown</string>
   <string name="TOOLBAR" translatable="false">Toolbar</string>
@@ -90,13 +109,19 @@
   <string name="DIALOG" translatable="false">Dialog</string>
   <string name="PUSH_NOTIFICATION" translatable="false">PushNotification</string>
   <string name="EXT_INTENT" translatable="false">ExtIntent</string>
+  <string name="CAMERA" translatable="false">CAMERA</string>
+  <string name="SOFT_KEYBOARD" translatable="false">SOFT_KEYBOARD</string>
+  <string name="PROGRESS" translatable="false">PROGRESS</string>
+
 
 
   <string name="PRM_VALUE" translatable="false">PRM_VALUE</string>
   <string name="PRM_ERROR" translatable="false">PRM_ERROR</string>
   <string name="PRM_ITEM_ID" translatable="false">PRM_ITEM_ID</string>
   <string name="PRM_ITEM_POS" translatable="false">PRM_ITEM_POS</string>
+  <string name="PRM_ITEM_TITLE" translatable="false">PRM_ITEM_TITLE</string>
   <string name="PRM_ITEM_TEXT" translatable="false">PRM_ITEM_TEXT</string>
+  <string name="PRM_ITEM_TAG" translatable="false">PRM_ITEM_TAG</string>
   <string name="PRM_ITEM_DATE" translatable="false">PRM_ITEM_DATE</string>
   <string name="PRM_ITEM_TYPE" translatable="false">PRM_ITEM_TYPE</string>
   <string name="PRM_ITEM_IMAGE" translatable="false">PRM_ITEM_IMAGE</string>
@@ -105,7 +130,20 @@
   <string name="PRM_ITEM_URL" translatable="false">PRM_ITEM_URL</string>
   <string name="PRM_DETAILS" translatable="false">PRM_DETAILS</string>
   <string name="PRM_REQUEST_CODE" translatable="false">PRM_REQUEST_CODE</string>
+  <string name="PRM_FORCE_REQUEST" translatable="false">PRM_FORCE_REQUESZ</string>
   <string name="PRM_RESULT_CODE" translatable="false">PRM_RESULT_CODE</string>
   <string name="PRM_ACTION" translatable="false">PRM_ACTION</string>
   <string name="PRM_INTENT_EXTRAS" translatable="false">PRM_INTENT_EXTRAS</string>
+  <string name="PRM_EXT_INTENT" translatable="false">PRM_EXT_INTENT</string>
+  <string name="PRM_WIDGET_LAYOUT" translatable="false">PRM_WIDGET_LAYOUT</string>
+  <string name="PRM_CONTENT_LAYOUT" translatable="false">PRM_CONTENT_LAYOUT</string>
+
+  <string-array name="pref_keys">
+    <item>@string/PREF_KEY_USER_PROFILE</item>
+    <item>@string/PREF_KEY_AUTO_LOGIN</item>
+  </string-array>
+
+  <string name="PREF_KEY_USER_PROFILE" translatable="false">logged_in_user_profile
+  </string>
+  <string name="PREF_KEY_AUTO_LOGIN" translatable="false">AutoLogin</string>
 </resources>

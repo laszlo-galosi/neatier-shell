@@ -137,6 +137,11 @@ public class GameTitleTitleListFragment extends BaseFragment implements
         super.onPause();
     }
 
+    @Override public void onDestroyView() {
+        mRecyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        super.onDestroyView();
+    }
+
     @Override
     public void onDestroy() {
         if (mWorkbenchPresenter != null) {
@@ -228,11 +233,6 @@ public class GameTitleTitleListFragment extends BaseFragment implements
     @Override
     protected boolean shouldRetainInstance() {
         return false;
-    }
-
-    @Override
-    public Context getContext() {
-        return getActivity();
     }
 
     @Override
@@ -352,5 +352,12 @@ public class GameTitleTitleListFragment extends BaseFragment implements
                           addModel(model.with(picassoInstance, context));
                       });
         }
+    }
+
+    @Override
+    protected void setupBottomNavigation(final View contentView, final Bundle savedInstanceState) {
+        ((MainActivity) getActivity()).setupBottomNavigationView(mRecyclerView,
+                                                                 savedInstanceState);
+        ((MainActivity) getActivity()).showHideBottomBar(true);
     }
 }

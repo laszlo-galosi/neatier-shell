@@ -16,13 +16,15 @@
 
 package com.neatier.shell.data.repository;
 
-import com.google.gson.JsonElement;
 import com.neatier.commons.helpers.KeyValuePairs;
 import rx.Observable;
 
 public interface DataSources {
-    interface SimpleApiResponseDataSource {
-        Observable<JsonElement> getSimpleJsonResponse(
-              final KeyValuePairs<String, Object> requestParams);
+    interface SimpleJsonResponseDataSource {
+        Observable getSimpleJsonResponse(final KeyValuePairs<String, Object> requestParams);
+    }
+
+    interface SimpleStringResponseDataSource {
+        Observable getSimpleStringResponse(final KeyValuePairs<String, Object> requestParams);
     }
 }

@@ -27,7 +27,7 @@ import com.neatier.shell.appframework.Navigator;
 import com.neatier.shell.appframework.helpers.DialogMaker;
 import com.neatier.shell.data.network.RestApi;
 import com.neatier.shell.data.repository.DataSources;
-import com.neatier.shell.data.repository.SimpleJsonResponseDataSource;
+import com.neatier.shell.data.repository.SimpleJsonResponseApiDataSource;
 import com.neatier.shell.factorysettings.AppSettings;
 import dagger.Module;
 import dagger.Provides;
@@ -86,8 +86,9 @@ public class ApplicationModule {
     }
 
     @Provides @NonNull @Singleton
-    public DataSources.SimpleApiResponseDataSource provideSimpleApiDataSource(RestApi restApi,
+    public DataSources.SimpleJsonResponseDataSource provideSimpleApiDataSource(RestApi restApi,
           JsonSerializer serializer) {
-        return new SimpleJsonResponseDataSource(restApi, serializer);
+        return new SimpleJsonResponseApiDataSource(restApi, serializer) {
+        };
     }
 }

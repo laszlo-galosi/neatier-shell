@@ -16,17 +16,16 @@ package com.neatier.shell.navigation;
 
 import android.content.Context;
 import android.support.v7.view.menu.MenuBuilder;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import com.neatier.shell.R;
-import com.neatier.shell.activities.MainActivity;
 import com.neatier.shell.appframework.BasePresenterImpl;
 import com.neatier.shell.eventbus.EventBuilder;
 import com.neatier.shell.internal.di.PerActivity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import rx.Observable;
+import rx.functions.Func1;
 
 /**
  * Created by László Gálosi on 18/05/16
@@ -35,7 +34,7 @@ import javax.inject.Inject;
 public class XmlNavigationMenuPresenterImpl extends BasePresenterImpl
       implements NavigationMenuPresenter {
 
-    private List<MenuItem> mMenuItems = new ArrayList<>(16);
+    protected List<MenuItem> mMenuItems = new ArrayList<>(16);
 
     @Inject public XmlNavigationMenuPresenterImpl() {
         super();
@@ -45,35 +44,71 @@ public class XmlNavigationMenuPresenterImpl extends BasePresenterImpl
         return mMenuItems;
     }
 
-    @Override public void onEvent(final EventBuilder event) {
-
-    }
-
     @Override public void initialize() {
         super.initialize();
         mView.onUpdateStarted();
         mMenuItems.clear();
 
         //Todo: replace this with the result of the API getChannels.
-        buildStaticMenu((MainActivity) mView);
+        Context context = mView.getContext();
+        MenuBuilder menu = new MenuBuilder(context);
+        MenuInflater mi = new MenuInflater(context);
+        mi.inflate(((MvpNavigationView) mView).getMenuResource(), menu);
+        initMenu(context, menu);
         mView.onUpdateFinished();
         mView.onModelReady();
     }
 
-    private void buildStaticMenu(final Context context) {
-        Menu menu = new MenuBuilder(context);
-        MenuInflater mi = new MenuInflater(context);
-        mi.inflate(R.menu.menu_navigation, menu);
+    @Override public void onEvent(final EventBuilder event) {
+
+    }
+
+    /**
+     * Initializes  menu items by applying item and sub menu group filters
+     * for the inflated {@link MenuBuilder} items.
+     *
+     * @param menu the inflated {@link MenuBuilder}
+     */
+    public void initMenu(final Context context, final MenuBuilder menu) {
         mMenuItems.clear();
-        for (int i = 0; i < menu.size(); i++) {
-            MenuItem subitem = menu.getItem(i);
-            mMenuItems.add(subitem);
-            if (subitem.hasSubMenu()) {
-                for (int j = 0, lenj = subitem.getSubMenu().size(); j < lenj; j++) {
-                    MenuItem item = subitem.getSubMenu().getItem(j);
-                    mMenuItems.add(item);
-                }
-            }
-        }
+        getMenuItemsAsListStream(menu).subscribe();
+    }
+
+    public Observable<List<MenuItem>> getMenuItemsAsListStream(final MenuBuilder menu) {
+        return Observable.range(0, menu.size())
+                         .flatMap(i -> Observable.just(menu.getItem(i)))
+                         .switchMap(menuItem -> {
+                             if (menuItem.hasSubMenu()) {
+                                 return Observable
+                                       .just(menuItem).concatWith(
+                                             Observable.range(0, menuItem.getSubMenu().size())
+                                                       .flatMap(i -> Observable.just(
+                                                             menuItem.getSubMenu().getItem(i)
+                                                       ).filter(getMenuItemFilter()))
+                                       ).filter(getSubMenuFilter());
+                             }
+                             return Observable.just(menuItem).filter(getMenuItemFilter());
+                         }).collect(() -> mMenuItems, (list, item) -> list.add(item));
+    }
+
+    /**
+     * Returns a filter {@link Func1} filter function to filter menu items from the inflated menu
+     * xml. The filters input {@link MenuItem} either has sub menu or not.
+     */
+    public Func1<MenuItem, Boolean> getMenuItemFilter() {
+        return item -> Boolean.TRUE;
+    }
+
+    public Func1<MenuItem, Boolean> getDefaultSelectionFilter() {
+        return item -> mMenuItems.indexOf(item) == 0;
+    }
+
+    /**
+     * Returns a filter {@link Func1} filter function to filter sub menu item for a menu group
+     * from the inflated menu.
+     * Use {@link #getMenuItemFilter()} to filter items of this sub menu group.
+     */
+    public Func1<MenuItem, Boolean> getSubMenuFilter() {
+        return item -> Boolean.TRUE;
     }
 }

@@ -17,6 +17,7 @@ package com.neatier.shell.factorysettings.developer;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import com.neatier.commons.helpers.SharedKeyValueStore;
+import com.neatier.shell.factorysettings.PrefKey;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
@@ -24,7 +25,6 @@ import okhttp3.logging.HttpLoggingInterceptor;
  */
 public class DeveloperSettings {
 
-    private static final String KEY_IS_STETHO_ENABLED = "is_stetho_enabled";
     private static final String KEY_IS_LEAK_CANARY_ENABLED = "is_leak_canary_enabled";
     private static final String KEY_PICASSO_INDICATOR_ENABLED = "use_picasso_indicator";
     private static final String KEY_IS_CRASHLYTICS_ENABLED = "is_crashlytics_enabled";
@@ -32,7 +32,17 @@ public class DeveloperSettings {
     private static final String KEY_PICASSO_ENABLE_LOGGING = "enable_picasso_logging";
     private static final String KEY_HTTP_LOGGING_LEVEL = "key_http_logging_level";
     private static final String KEY_ENABLE_CRASH_ON_RXLOG = "key_enable_crash_on_rxlog";
+    private static final String KEY_FORCE_PORTRAIT_ORIENTATION = "key_force_portrait_orientation";
+    private static final String KEY_SHOW_DEBUG_VIEWS = "key_enable_debug_views";
+    private static final String KEY_STRICT_MODE_ENABLED = "key_strict_mode_enabled";
 
+    public static final String DEV_HELLO_PASS = "{"
+          //+ "\token\" : \"3c3d6e72-7057-4d98-abc4-e79d97b28294\", "
+          + "\"email\" : \"laszlo.galosi@gmail.com\", "
+          + "\"name\" : \"Gálosi László\", "
+          + "\"password\" : \"asdasdasd\", "
+          + "\"termsAccepted\" : true "
+          + "}";
 
     @NonNull
     private final SharedKeyValueStore<String, Object> mSharedKeyValueStore;
@@ -41,21 +51,12 @@ public class DeveloperSettings {
         mSharedKeyValueStore = sharedKeyValueStore;
     }
 
-    public boolean isStethoEnabled() {
-        return mSharedKeyValueStore.getAsOrDefault(KEY_IS_STETHO_ENABLED, Boolean.class,
-                                                   Boolean.FALSE);
-    }
-
-    public void saveIsStethoEnabled(boolean isStethoEnabled) {
-        mSharedKeyValueStore.put(KEY_IS_STETHO_ENABLED, isStethoEnabled).apply();
-    }
-
     public boolean isLeakCanaryEnabled() {
         return mSharedKeyValueStore.getAsOrDefault(KEY_IS_LEAK_CANARY_ENABLED, Boolean.class,
                                                    Boolean.FALSE);
     }
 
-    public void saveIsLeakCanaryEnabled(boolean isLeakCanaryEnabled) {
+    public void setLeakCanaryEnabled(boolean isLeakCanaryEnabled) {
         mSharedKeyValueStore.put(KEY_IS_LEAK_CANARY_ENABLED, isLeakCanaryEnabled).apply();
     }
 
@@ -64,7 +65,7 @@ public class DeveloperSettings {
                                                    Boolean.FALSE);
     }
 
-    public void savePicassoIndicatorEnabled(boolean enable) {
+    public void setPicassoIndicatorEnabled(boolean enable) {
         mSharedKeyValueStore.put(KEY_PICASSO_INDICATOR_ENABLED, enable).apply();
     }
 
@@ -73,7 +74,7 @@ public class DeveloperSettings {
                                                    Boolean.FALSE);
     }
 
-    public void saveIsCrashlyticsEnabled(boolean enable) {
+    public void setIsCrashlyticsEnabled(boolean enable) {
         mSharedKeyValueStore.put(KEY_IS_CRASHLYTICS_ENABLED, enable).apply();
     }
 
@@ -82,7 +83,7 @@ public class DeveloperSettings {
                                                    Boolean.FALSE);
     }
 
-    public void saveAutoFillTestValuesEnabled(boolean enable) {
+    public void setAutoFillTestValuesEnabled(boolean enable) {
         mSharedKeyValueStore.put(KEY_ENABLE_AUTO_FILL_VALUES, enable).apply();
     }
 
@@ -91,7 +92,7 @@ public class DeveloperSettings {
                                                    Boolean.FALSE);
     }
 
-    public void savePicassoLoggingEnabled(boolean enabled) {
+    public void setPicassoLoggingEnabled(boolean enabled) {
         mSharedKeyValueStore.put(KEY_PICASSO_ENABLE_LOGGING, enabled).apply();
     }
 
@@ -100,7 +101,7 @@ public class DeveloperSettings {
                                                    HttpLoggingInterceptor.Level.BASIC.name());
     }
 
-    public void saveHttpLoggingLevel(HttpLoggingInterceptor.Level level) {
+    public void setHttpLoggingLevel(HttpLoggingInterceptor.Level level) {
         mSharedKeyValueStore.put(KEY_HTTP_LOGGING_LEVEL, level.name()).apply();
     }
 
@@ -109,7 +110,44 @@ public class DeveloperSettings {
                                                    Boolean.FALSE);
     }
 
-    public void saveCrashOnRxLogEnabled(boolean enabled) {
+    public void setCrashOnRxLogEnabled(boolean enabled) {
         mSharedKeyValueStore.put(KEY_ENABLE_CRASH_ON_RXLOG, enabled).apply();
+    }
+
+    public boolean isPortraitOrientationForced() {
+        return mSharedKeyValueStore.getAsOrDefault(KEY_FORCE_PORTRAIT_ORIENTATION, Boolean.class,
+                                                   Boolean.FALSE);
+    }
+
+    public void setForcePortraitOrientation(boolean forced) {
+        mSharedKeyValueStore.put(KEY_FORCE_PORTRAIT_ORIENTATION, forced).apply();
+    }
+
+    public boolean shouldShowDebugViews() {
+        return mSharedKeyValueStore.getAsOrDefault(KEY_SHOW_DEBUG_VIEWS, Boolean.class,
+                                                   Boolean.FALSE);
+    }
+
+    public void setShowDebugViews(boolean forced) {
+        mSharedKeyValueStore.put(KEY_SHOW_DEBUG_VIEWS, forced).apply();
+    }
+
+    public boolean isStrictModeEnabled() {
+        return mSharedKeyValueStore.getAsOrDefault(KEY_STRICT_MODE_ENABLED, Boolean.class,
+                                                   Boolean.FALSE);
+    }
+
+    public void setStrictModeEbabled(boolean enable) {
+        mSharedKeyValueStore.put(KEY_STRICT_MODE_ENABLED, enable).apply();
+    }
+
+    public DeveloperSettings setPref(PrefKey prefKey, Object value) {
+        mSharedKeyValueStore.put(prefKey.name, value).apply();
+        return this;
+    }
+
+    public DeveloperSettings clearPref(PrefKey prefKey) {
+        mSharedKeyValueStore.remove(prefKey.name).apply();
+        return this;
     }
 }

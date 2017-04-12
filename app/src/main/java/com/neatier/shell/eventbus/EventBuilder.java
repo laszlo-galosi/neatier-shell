@@ -105,6 +105,10 @@ public class EventBuilder extends BundleWrapper {
         RxBus.getInstance().send(this);
     }
 
+    public void deliver(EventDeliverable deliverable) {
+        deliverable.deliver(this);
+    }
+
     public <T> Optional<T> getIdParamValue(Class<T> returnClass, T... fallback) {
         return getParamAs(EventParam.PRM_ITEM_ID, returnClass, fallback.length > 0 ? fallback[0]
                                                                                    : null);
@@ -153,11 +157,10 @@ public class EventBuilder extends BundleWrapper {
           final Class<T> clazz) {
         try {
             //noinspection unchecked
-            Optional<T> valueOptional =
-                  Optional.fromNullable(super.getAs(getParamName(paramId), clazz));
-            return valueOptional.isPresent() && valueOptional.get().getClass() == clazz;
+            Object o = getBundle().get(getParamName(paramId));
+            return o != null && o.getClass() == clazz;
         } catch (final ClassCastException ex) {
-            //Log.e(ex);
+            Log.e(ex);
             return false;
         }
     }
@@ -208,7 +211,7 @@ public class EventBuilder extends BundleWrapper {
 
     public Log logMe(String... args) {
         String message = TextUtils.join("\t", args);
-        return Log.d(message, getItem(), getEventType());
+        return Log.v(message, getItem(), getEventType());
     }
 
     public Log logReceived(String... args) {
@@ -230,6 +233,29 @@ public class EventBuilder extends BundleWrapper {
 
     @Override public int hashCode() {
         return getBundle().hashCode();
+    }
+
+    public String toString(Func1<String, Boolean> filterParams) {
+        final StringBuilder sb = new StringBuilder("EventBuilder{");
+        Item item = getItem();
+        Event eventType = getEventType();
+        if (item.id != Item.UNKNOWN_ITEM) {
+            sb.append(EventKey.ITEM_NAME + " : " + item.name);
+        }
+        if (eventType.id != Event.EVT_UNKNOWN) {
+            sb.append(", " + EventKey.EVENT_NAME + " : " + eventType.name);
+        }
+        Observable.from(getBundle().keySet())
+                  .filter(
+                        key -> !key.equals(EventKey.ITEM_NAME) && !key.equals(EventKey.EVENT_NAME))
+                  .filter(filterParams)
+                  .toBlocking()
+                  .subscribe(key -> {
+                      sb.append("\n\t" + key)
+                        .append(" : '" + getBundle().get(key) + "', ");
+                  });
+        sb.append("}");
+        return sb.toString();
     }
 
     @Override public String toString() {

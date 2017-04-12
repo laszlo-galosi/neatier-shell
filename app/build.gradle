@@ -20,13 +20,11 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply from: '../dependencies.gradle'
 //Dagger 2 annotation processor
+//Dagger 2 annotation processor
 apply plugin: 'com.neenbedankt.android-apt'
-//Dex counter plugin
-apply plugin: 'com.getkeepsafe.dexcount'
 //Retrolambda
 apply plugin: 'me.tatarka.retrolambda'
-
-apply plugin: 'android-apt'
+apply plugin: 'com.fernandocejas.frodo'
 
 android {
   compileSdkVersion versions.androidCompileSdkVersion
@@ -42,7 +40,8 @@ android {
     testInstrumentationRunner versions.testInstrumentationRunner
     testApplicationId versions.testApplicationId
 
-    //    multiDexEnabled true
+    multiDexEnabled true
+    vectorDrawables.useSupportLibrary = true
   }
 
   compileOptions {
@@ -58,7 +57,6 @@ android {
       keyPassword 'android'
     }
 
-    //Todo: replace this with a valid CA keystore and key
     release {
       storeFile file('../buildsystem/debug.keystore')
       storePassword 'android'
@@ -74,7 +72,7 @@ android {
       signingConfig signingConfigs.release
     }
     debug {
-      minifyEnabled true
+      minifyEnabled false
       signingConfig signingConfigs.debug
       applicationIdSuffix '.debug'
     }
@@ -142,13 +140,20 @@ android {
 dependencies {
   //======= Internal dependencies
   compile fileTree(dir: 'libs', include: ['*.jar'])
-  compile project(':neatier-commons:commons')
-  compile project(':neatier-commons:widgets')
-  compile project(':neatier-commons:repository')
+
+  debugCompile project(path: ':neatier-commons:commons', configuration: "debug")
+  releaseCompile project(path: ':neatier-commons:commons', configuration: "release")
+
+  debugCompile project(path: ':neatier-commons:widgets', configuration: "debug")
+  releaseCompile project(path: ':neatier-commons:widgets', configuration: "release")
+
+  debugCompile project(path: ':neatier-commons:repository', configuration: "debug")
+  releaseCompile project(path: ':neatier-commons:repository', configuration: "release")
+
 
   //    Optional, Collections, Guava like but lightweight on method count library
 
-  //  compile appBuildingDependencies.multidex
+  compile appBuildingDependencies.multidex
 
   //=======    dependency Injection Dagger 2 related
   apt appBuildingDependencies.daggerCompiler
@@ -160,6 +165,7 @@ dependencies {
   compile appBuildingDependencies.rxJava
   //  compile appBuildingDependencies.rxLint
   compile appBuildingDependencies.rxAndroid
+  compile appBuildingDependencies.rxBinding
 
   //=======    android support libraries, uncomment this if needed.
   compile appBuildingDependencies.supportV7
@@ -198,11 +204,6 @@ dependencies {
 
   //=======    Unit testing
   testCompile unitTestDependencies.junit
-  //    testCompile robolectricTestDependencies.junit
-  //    testCompile robolectricTestDependencies.assertj
-  //    testCompile robolectricTestDependencies.mockito
-  //    testCompile robolectricTestDependencies.robolectric
-  //    testCompile unitTestDependencies.leakcanary_test
   androidTestCompile uiTestDependencies.espresso
   androidTestCompile uiTestDependencies.testingSupportRunner
 }

@@ -15,6 +15,7 @@
 package com.neatier.shell.appframework;
 
 import android.content.Context;
+import com.neatier.commons.helpers.BundleWrapper;
 import com.neatier.commons.helpers.KeyValuePairs;
 import com.neatier.shell.eventbus.EventBuilder;
 import com.neatier.shell.exception.ErrorMessageFactory;
@@ -83,5 +84,7 @@ public interface AppMvp {
         Context getContext();
 
         KeyValuePairs<String, Object> getApiParams();
+
+        BundleWrapper getArgumentBundle();
     }
 }

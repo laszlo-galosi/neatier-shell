@@ -15,21 +15,20 @@
 package com.neatier.shell.appframework;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import butterknife.BindView;
-import com.fernandocejas.arrow.collections.Lists;
 import com.neatier.commons.helpers.BundleWrapper;
 import com.neatier.shell.R;
+import com.neatier.shell.data.network.ApiSettings;
 import com.neatier.shell.eventbus.EventParam;
-import java.util.List;
 import trikita.log.Log;
 
 /**
@@ -56,12 +55,22 @@ public class WebViewFragment extends BaseFragment implements TaggedBaseFragment 
         WebViewFragment fragment = new WebViewFragment();
         Log.w("newInstance ", bundleWrapper);
         if (bundleWrapper != null) {
-            BundleWrapper copyBundle = bundleWrapper.copy();
+            BundleWrapper copyBundle = bundleWrapper.copy().clear(fragment.argumentsToRetain());
             fragment.setArguments(copyBundle.getBundle());
         } else {
             fragment.setArguments(new Bundle());
         }
+        Log.w("newInstance ", fragment.getFragmentTag()).w(fragment.getArgumentBundle());
         return fragment;
+    }
+
+    @Override protected String[] argumentsToRetain() {
+        return new String[] {
+              EventParam.itemTitle().name,
+              EventParam.itemUrl().name,
+              EventParam.itemText().name,
+              EventParam.itemTag().name
+        };
     }
 
     public WebViewFragment() {
@@ -73,15 +82,20 @@ public class WebViewFragment extends BaseFragment implements TaggedBaseFragment 
         super.onInflateLayout(contentView, savedInstanceState);
         setHasOptionsMenu(false);
         setupWebView();
+        loadContent();
     }
 
-    @Override public List<Integer> getDisplayableToolbarIcons() {
-        return Lists.newArrayList();
-    }
-
-    @Override
-    protected void initialize() {
-        super.initialize();
+    private void loadContent() {
+        String htmlContent = getHtmlContent();
+        String itemUrl = getUrl();
+        if (!TextUtils.isEmpty(htmlContent)) {
+            Log.v("loadContent", htmlContent);
+            mWebView.loadDataWithBaseURL(ApiSettings.DEFAULT_SERVER_ENDPOINT, htmlContent,
+                                         "text/html", "UTF-8", null);
+        } else if (TextUtils.isEmpty(htmlContent) && !TextUtils.isEmpty(itemUrl)) {
+            Log.v("loadContent", itemUrl);
+            mWebView.loadUrl(itemUrl);
+        }
     }
 
     @Override
@@ -92,21 +106,16 @@ public class WebViewFragment extends BaseFragment implements TaggedBaseFragment 
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         mWebView.onResume();
         mWebView.resumeTimers();
-        mWebView.loadUrl(getUrl());
     }
 
     @Override
     public String getFragmentTag() {
-        return String.format("%s_%s", TAG, getUrl());
+        return getArgumentBundle().getAs(EventParam.itemTag().name, String.class,
+                                         String.format("%s_%s", TAG, getUrl()));
     }
 
     @Override
@@ -125,27 +134,29 @@ public class WebViewFragment extends BaseFragment implements TaggedBaseFragment 
         Log.d("onModelReady", mLayoutReady);
     }
 
-    @Override
-    public boolean isResultFromCloud() {
-        return true;
-    }
-
-    @Override
-    protected boolean shouldRetainInstance() {
-        return true;
-    }
-
-    @Override
-    public Context getContext() {
-        return getActivity();
+    @Override public boolean shouldGoBack() {
+        return false;
     }
 
     @Override
     public void clearLeakables() {
     }
 
+    @Override
+    protected void setupBottomNavigation(final View contentView, final Bundle savedInstanceState) {
+        //NoOp.
+    }
+
     public String getUrl() {
-        return BundleWrapper.wrap(getArguments()).getAs(EventParam.itemUrl().name, String.class);
+        return getArgumentBundle().getAs(EventParam.itemUrl().name, String.class);
+    }
+
+    @Override public String getToolbarTitle() {
+        return getArgumentBundle().getAs(EventParam.itemTitle().name, String.class);
+    }
+
+    public String getHtmlContent() {
+        return getArgumentBundle().getAs(EventParam.itemText().name, String.class);
     }
 
     private void setupWebView() {
@@ -154,7 +165,9 @@ public class WebViewFragment extends BaseFragment implements TaggedBaseFragment 
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
-                mWebView.setVisibility(View.VISIBLE);
+                if (mWebView != null) {
+                    mWebView.setVisibility(View.VISIBLE);
+                }
             }
         });
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -173,3 +186,4 @@ public class WebViewFragment extends BaseFragment implements TaggedBaseFragment 
         }
     }
 }
+

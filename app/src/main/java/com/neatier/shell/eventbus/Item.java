@@ -39,6 +39,9 @@ public class Item {
     public static final int DIALOG = R.string.DIALOG;
     public static final int PUSH_NOTIFICATION = R.string.PUSH_NOTIFICATION;
     public static final int EXT_INTENT = R.string.EXT_INTENT;
+    public static final int CAMERA = R.string.CAMERA;
+    public static final int SOFT_KEYBOARD = R.string.SOFT_KEYBOARD;
+    public static final int PROGRESS = R.string.PROGRESS;
 
     private static SparseArray<Item> values;
     static TypedArray sItemIds;
@@ -70,7 +73,8 @@ public class Item {
     }
 
     @IntDef({ UNKNOWN_ITEM, TOOLBAR, SNACKBAR, NAV_MENU_ITEM, SELF, SELF_CONTAINER, SETTINGS,
-                  DIALOG, PUSH_NOTIFICATION, EXT_INTENT })
+                  DIALOG, PUSH_NOTIFICATION, EXT_INTENT, CAMERA, SOFT_KEYBOARD, PROGRESS
+            })
     @Retention(RetentionPolicy.SOURCE)
     /**
      * {@link InDef} annotation for identifying unique app items.

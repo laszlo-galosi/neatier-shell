@@ -1,33 +1,35 @@
 /*
- *  Copyright (C) 2016 Delight Solutions Ltd., All Rights Reserved
- *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ * Copyright (C) 2016 Extremenet Ltd., All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited.
  *  Proprietary and confidential.
- *
- *  All information contained herein is, and remains the property of Delight Solutions Kft.
- *  The intellectual and technical concepts contained herein are proprietary to Delight Solutions
-  *  Kft.
+ *  All information contained herein is, and remains the property of Extremenet Ltd.
+ *  The intellectual and technical concepts contained herein are proprietary to Extremenet Ltd.
  *   and may be covered by U.S. and Foreign Patents, pending patents, and are protected
  *  by trade secret or copyright law. Dissemination of this information or reproduction of
  *  this material is strictly forbidden unless prior written permission is obtained from
- *   Delight Solutions Kft.
+ *   Extremenet Ltd.
+ *
  */
-
 package com.neatier.shell.appframework;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -47,14 +49,16 @@ import com.neatier.shell.eventbus.Item;
 import com.neatier.shell.eventbus.RxBus;
 import com.neatier.shell.exception.ErrorMessageFactory;
 import com.neatier.shell.exception.RxLogger;
+import com.neatier.shell.factorysettings.AppSettings;
 import com.neatier.shell.internal.di.HasComponent;
 import java.util.Arrays;
 import java.util.List;
 import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.android.app.AppObservable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import trikita.log.Log;
 
@@ -74,11 +78,8 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     protected boolean mLayoutReady;
     protected boolean mInitWithError;
     protected boolean mWaitingForDestroy;
-    private MenuItem mNavMenuItem;
-    protected View mPasswordView;
-    protected EditText mPasswordField;
-    protected Button mPasswordButtonNext;
-    protected View mAccessBackgroundView;
+    protected BroadcastReceiver mBroadcastEventReceiver;
+    private IntentFilter mEventIntentFilter;
 
     @CallSuper
     @Override public void onCreate(Bundle savedInstanceState) {
@@ -88,8 +89,22 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         setRetainInstance(shouldRetainInstance());
     }
 
+    protected void onLocalBroadcastReceived(final Intent intent) {
+        int requestCode = intent.getExtras().getInt(EventParam.requestCode().name);
+        int resultCode = intent.getExtras().getInt(EventParam.resultCode().name);
+        onActivityResult(requestCode, resultCode, intent);
+    }
+
+    protected IntentFilter getLocalBroadcastIntentFilter() {
+        return new IntentFilter(AppSettings.ACTION_REQUIRE_PERMISSION);
+    }
+
     protected boolean shouldRetainInstance() {
         return true;
+    }
+
+    protected String[] argumentsToRetain() {
+        return new String[] {};
     }
 
     @CallSuper @Nullable
@@ -100,6 +115,26 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         View fragmentView = inflater.inflate(getContentLayout(), container, false);
         onInflateLayout(fragmentView, savedInstanceState);
         return fragmentView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_toolbar, menu);
+        ((MainActivity) getActivity()).setToolbarItems((TaggedBaseFragment) this);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+            case R.id.action_settings:
+            default:
+                EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
+                            .addParam(EventParam.PRM_ITEM_ID, item.getItemId())
+                            .send();
+        }
+        return true;
     }
 
     /**
@@ -117,6 +152,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         if (hasProgressView()) {
             bindProgressView(contentView);
         }
+        setupBottomNavigation(contentView, savedInstanceState);
     }
 
     protected abstract @LayoutRes int getContentLayout();
@@ -154,9 +190,6 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         Log.d(getFragmentTag(), "onResume");
         loadStateArguments();
         resubscribe();
-        if (isAccessProtected() && mPasswordField != null) {
-            mPasswordField.setText(null);
-        }
         super.onResume();
     }
 
@@ -179,7 +212,16 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     @CallSuper
     @Override public void onDestroyView() {
         Log.d(getFragmentTag(), "onDestroyView");
+        mWaitingForDestroy = true;
         hideSoftKeyboard(getView());
+        unsubscribe();
+        if (mUnbinder != null) {
+            mUnbinder.unbind();
+        }
+        LocalBroadcastManager.getInstance(getContext())
+                             .unregisterReceiver(mBroadcastEventReceiver);
+        mBroadcastEventReceiver = null;
+        mEventIntentFilter = null;
         super.onDestroyView();
     }
 
@@ -188,6 +230,8 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         mWaitingForDestroy = true;
         clearLeakables();
         super.onDestroy();
+        LocalBroadcastManager.getInstance(getContext())
+                             .unregisterReceiver(mBroadcastEventReceiver);
         mWaitingForDestroy = false;
     }
 
@@ -218,11 +262,13 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     protected void resubscribe() {
         Log.v(getFragmentTag(), "resubscribe", this.subscription);
         ensureSubs().add(
-              AppObservable.bindFragment(this, RxBus.getInstance()
-                                                    .toObservable(getEventFilter()))
-                           .onBackpressureBuffer(10000)
-                           .subscribe(
-                                 (Observer<? super EventBuilder>) getOrCreateEventSubscriber()));
+              /*AndroidObservable.bindFragment(this, RxBus.getInstance()
+                                                       .toObservable(getEventFilter()))*/
+              RxBus.getInstance().toObservable(getEventFilter())
+                   .onBackpressureBuffer(AppSettings.BACKPRESSURE_CAPACITY)
+                   .subscribeOn(Schedulers.io())
+                   .observeOn(AndroidSchedulers.mainThread())
+                   .subscribe((Observer<? super EventBuilder>) getOrCreateEventSubscriber()));
     }
 
     /**
@@ -324,11 +370,11 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         return "";
     }
 
-    public abstract boolean hasProgressView();
-
-    public boolean isAccessProtected() {
+    public boolean shouldGoBack() {
         return false;
     }
+
+    public abstract boolean hasProgressView();
 
     public boolean hasBottomNavigationBar() {
         return true;
@@ -363,7 +409,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     }
 
     public List<Integer> getDisplayableToolbarIcons() {
-        return Lists.newArrayList(android.R.id.home);
+        return Lists.newArrayList(android.R.id.home, R.id.action_settings);
     }
 
     @Override public void showError(final ErrorMessageFactory.Error error) {
@@ -385,7 +431,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     }
 
     @Override public boolean isResultFromCloud() {
-        return false;
+        return true;
     }
 
     @Override public void onUpdateStarted() {
@@ -396,26 +442,34 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
         }
     }
 
+    @Override
+    public Context getContext() {
+        return getActivity();
+    }
+
     @Override public void onUpdateFinished(Throwable... errors) {
-        Log.v(getFragmentTag(), "onUpdateFinished", Arrays.toString(errors));
+        Log.v(getFragmentTag(), "onUpdateFinished", Arrays.asList(errors));
         if (hasProgressView()) {
             hideProgress();
         }
         if (errors.length > 0) {
             mInitWithError = true;
+            mWaitingForModelUpdate = false;
         } else {
             mWaitingForModelUpdate = false;
         }
     }
 
-    public boolean shouldGoBack() {
-        return false;
+    @Override public BundleWrapper getArgumentBundle() {
+        return BundleWrapper.wrap(getArguments());
     }
 
     public void hideSoftKeyboard(View view) {
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-              Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        if (getActivity().getCurrentFocus() != null && view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                  Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     protected @Nullable Optional<String> getMessage(final EventBuilder event) {
@@ -432,9 +486,18 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
 
     public void setCustomTransitionAnimations(FragmentTransaction fragmentTransaction,
           Optional<String> openAtFragmentTag) {
-        fragmentTransaction.setCustomAnimations(R.anim.enter_from_right,
-                                                R.anim.exit_to_left,
-                                                R.anim.enter_from_left,
-                                                R.anim.exit_to_right);
+        fragmentTransaction.setCustomAnimations(R.anim.fade_in,
+                                                R.anim.fade_out,
+                                                R.anim.fade_in,
+                                                R.anim.fade_out);
+    }
+
+    protected void setupBottomNavigation(View contentView, Bundle savedInstanceState) {
+        ((MainActivity) getActivity()).setupBottomNavigationView(contentView, savedInstanceState);
+        //((MainActivity) getActivity()).showHideBottomBar(true);
+    }
+
+    public boolean shouldShowToolbar() {
+        return true;
     }
 }

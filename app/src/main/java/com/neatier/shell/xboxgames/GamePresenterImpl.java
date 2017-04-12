@@ -16,6 +16,7 @@ package com.neatier.shell.xboxgames;
 
 import com.fernandocejas.arrow.collections.Lists;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.neatier.commons.helpers.DateTimeHelper;
 import com.neatier.commons.helpers.HeapHog;
@@ -45,12 +46,12 @@ public class GamePresenterImpl extends BasePresenterImpl
       implements GamePresenter, HeapHog {
 
     private List<GameTitleItemModel> mItemList = new ArrayList<>(25);
-    private DataSources.SimpleApiResponseDataSource simpleApiDataSource;
+    private DataSources.SimpleJsonResponseDataSource simpleApiDataSource;
     private JsonSerializer serializer;
     private LongTaskScheduler mLongTaskScheduler = new LongTaskOnIOScheduler();
 
     @Inject
-    public GamePresenterImpl(DataSources.SimpleApiResponseDataSource simpleApiDataSource,
+    public GamePresenterImpl(DataSources.SimpleJsonResponseDataSource simpleApiDataSource,
           JsonSerializer serializer) {
         this.simpleApiDataSource = simpleApiDataSource;
         this.serializer = serializer;
@@ -62,20 +63,23 @@ public class GamePresenterImpl extends BasePresenterImpl
         mView.onUpdateStarted();
         //Observable.range(0, 20)
         String listType = (String) mView.getApiParams().get(ApiSettings.KEY_API_LIST_TYPE);
+        mView.getApiParams().put(ApiSettings.KEY_API_ACTION, ApiSettings.ACTION_LIST_GAMES);
         simpleApiDataSource.getSimpleJsonResponse(mView.getApiParams())
                            //.map(index -> getModelItem(index, new Random(index)))
-                           .flatMap(jsonElem -> {
-                               if (jsonElem.isJsonObject()) {
+                           .flatMap(result -> {
+                               JsonElement jsonElem = (JsonElement) result;
+                               if (!jsonElem.isJsonNull() && jsonElem.isJsonObject()) {
                                    JsonArray titles =
                                          serializer.getAsChecked("titles",
                                                                  jsonElem.getAsJsonObject(),
                                                                  JsonArray.class);
                                    return Observable.range(0, titles.size())
-                                                    .map(index -> titles.get(index)
-                                                                        .getAsJsonObject())
+                                                    .flatMap(index -> Observable.just(
+                                                          titles.get(index).getAsJsonObject()))
                                                     .flatMap(titleObj -> {
                                                         if (mView != null) {
-                                                            return getModelItem(titleObj);
+                                                            return Observable
+                                                                  .just(getModelItem(titleObj));
                                                         }
                                                         return Observable.empty();
                                                     });
@@ -127,7 +131,7 @@ public class GamePresenterImpl extends BasePresenterImpl
               .imageUrl("");
     }
 
-    private Observable<GameTitleView$GameTitleItemModel_> getModelItem(
+    private GameTitleView$GameTitleItemModel_ getModelItem(
           final JsonObject json) {
         //Now creating an event with the common parameters.
         String listType = (String) mView.getApiParams().get(ApiSettings.KEY_API_LIST_TYPE);
@@ -152,7 +156,7 @@ public class GamePresenterImpl extends BasePresenterImpl
                     .achivement(totalAchi == null ? String.valueOf(earnedAchi)
                                                   : String.format("%d/%d", earnedAchi, totalAchi))
                     .gamerScore(String.format("%d/%d", gameScore, totalGameScore));
-        return Observable.just(itemModel);
+        return itemModel;
     }
 
     @Override public List<GameTitleItemModel> getItems() {

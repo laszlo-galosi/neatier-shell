@@ -17,15 +17,18 @@ package com.neatier.shell.activities;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.CoordinatorLayout;
+import android.support.annotation.MenuRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.NestedScrollingChild;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,42 +46,47 @@ import com.neatier.commons.helpers.KeyValuePairs;
 import com.neatier.commons.helpers.LongTaskOnIOScheduler;
 import com.neatier.shell.NeatierShellApplication;
 import com.neatier.shell.R;
-import com.neatier.shell.appframework.AppMvp;
 import com.neatier.shell.appframework.MultiFragmentActivity;
 import com.neatier.shell.appframework.Navigator;
 import com.neatier.shell.appframework.TaggedBaseFragment;
 import com.neatier.shell.appframework.helpers.DialogMaker;
+import com.neatier.shell.appframework.helpers.PermissionInteraction;
 import com.neatier.shell.data.network.ApiSettings;
+import com.neatier.shell.eventbus.BehaviorRxBus;
 import com.neatier.shell.eventbus.Event;
 import com.neatier.shell.eventbus.EventBuilder;
 import com.neatier.shell.eventbus.EventParam;
 import com.neatier.shell.eventbus.Item;
 import com.neatier.shell.exception.ErrorMessageFactory;
+import com.neatier.shell.factorysettings.AppSettings;
 import com.neatier.shell.home.HomeFragment;
 import com.neatier.shell.internal.di.DaggerMainComponent;
 import com.neatier.shell.internal.di.HasComponent;
 import com.neatier.shell.internal.di.MainComponent;
 import com.neatier.shell.internal.di.MainModule;
+import com.neatier.shell.navigation.MvpNavigationView;
 import com.neatier.shell.navigation.NavigationMenuItemAdapter;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
+import com.neatier.shell.navigation.bottomnav.BottomNavigationMenuPresenter;
+import com.neatier.shell.navigation.bottomnav.BottomNavigationWidget;
 import com.neatier.shell.xboxgames.GameTitleTitleListFragment;
+import java.util.List;
 import javax.inject.Inject;
 import trikita.log.Log;
 
 public class MainActivity extends MultiFragmentActivity implements
                                                         HasComponent<MainComponent>,
-                                                        AppMvp.LongTaskBaseView,
+                                                        MvpNavigationView,
                                                         ViewTreeObserver.OnGlobalLayoutListener {
 
-    @BindView(R.id.mainLayout) CoordinatorLayout mCoordinatorLayout;
     @BindView(R.id.content_main) View mMainContentView;
     @BindView(R.id.nav_view) NavigationView mNavigationView;
     @BindView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @BindView(R.id.nav_menu) RecyclerView mNavMenuRecyclerView;
-    @BindView(R.id.bottom_navigation_view) BottomNavigationView mBottomNavigationView;
+    /*@BindView(R.id.bottom_navigation_view)*/ BottomNavigationWidget mBottomNavigationWidget;
 
-    @Inject
-    NavigationMenuPresenter mNavigationMenuPresenter;
+    @Inject NavigationMenuPresenter mNavigationMenuPresenter;
+    @Inject BottomNavigationMenuPresenter mBottomNavigationMenuPresenter;
     private boolean mLayoutReady;
 
     private boolean mInitWithError;
@@ -86,6 +94,8 @@ public class MainActivity extends MultiFragmentActivity implements
     private MainComponent mainComponent;
     private GestureDetectorCompat mGestureDetector;
     private NavigationMenuItemAdapter mNavMenuAdapter;
+    private View mBottomNavigationUserContentView;
+    @Inject PermissionInteraction permissionInteraction;
 
     /**
      * Static method returning a starter intent of this Activity, used by the {@link Navigator}.
@@ -102,6 +112,10 @@ public class MainActivity extends MultiFragmentActivity implements
         Log.d("onCreate", savedInstanceState);
         super.onCreate(savedInstanceState);
 
+        if (getApplicationComponent().developerSettings().isPortraitOrientationForced()) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+
         //Inject ApplicationComponent to this activity, so the @Singletons are injected to this.
         ((NeatierShellApplication) getApplication()).getComponent().inject(this);
 
@@ -111,18 +125,12 @@ public class MainActivity extends MultiFragmentActivity implements
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         initializeInjector();
         mNavigationMenuPresenter = getComponent().navigationMenuPresenter();
+        mBottomNavigationMenuPresenter = getComponent().bottomNavigationMenuPresenter();
+        permissionInteraction = getComponent().permissionInteraction();
         mNavigationMenuPresenter.setView(this);
+        mBottomNavigationMenuPresenter.setView(this);
         setupNavigationView();
-
-        mBottomNavigationView.setOnNavigationItemSelectedListener(
-              item -> {
-                  handleNavigation(
-                        EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
-                                    .addParam(EventParam.PRM_ITEM_ID, item.getItemId())
-                  );
-                  return true;
-              }
-        );
+        setupBottomNavigationView(null, savedInstanceState);
 
         //Creating a main bundle for arguments.
         mMainBundle = BundleWrapper.wrap(new Bundle());
@@ -139,6 +147,43 @@ public class MainActivity extends MultiFragmentActivity implements
         if (savedInstanceState == null) {
             mCurrentFragmentTag = HomeFragment.TAG;
             onRestoreInstanceState(mMainBundle.getBundle());
+        }
+    }
+
+    @Override public void onRequestPermissionsResult(final int requestCode,
+          @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        permissionInteraction.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("onActivityResult", "requestCode", requestCode, "resultCode", resultCode).v(data);
+        if (requestCode == AppSettings.REQUEST_CODE_CHECK_PLAY_SERVICES) {
+            EventBuilder.withItemAndType(Item.PUSH_NOTIFICATION, Event.EVT_RESULT)
+                        .addParam(EventParam.PRM_VALUE, resultCode)
+                        .send();
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+            EventBuilder resultEvent =
+                  EventBuilder.withItemAndType(Item.EXT_INTENT, Event.EVT_RESULT)
+                              .addParam(EventParam.PRM_REQUEST_CODE, requestCode)
+                              .addParam(EventParam.PRM_RESULT_CODE, resultCode);
+            if (data != null) {
+                resultEvent.addParam(EventParam.PRM_VALUE, data);
+                if (data.hasExtra(EventParam.requestCode().name)) {
+                    int overrideReqCode = data.getIntExtra(EventParam.requestCode().name,
+                                                           requestCode);
+                    resultEvent.addParam(EventParam.PRM_REQUEST_CODE, overrideReqCode);
+                }
+            }
+            switch (requestCode) {
+                case AppSettings.REQUEST_CODE_SIGN_IN_REQUIRED:
+                    BehaviorRxBus.getInstance().send(resultEvent);
+                    break;
+                default:
+                    resultEvent.send();
+            }
         }
     }
 
@@ -250,7 +295,50 @@ public class MainActivity extends MultiFragmentActivity implements
 
     @Override
     public Context getContext() {
-        return null;
+        return this;
+    }
+
+    @Override public BundleWrapper getArgumentBundle() {
+        return mMainBundle;
+    }
+
+    public void setupBottomNavigationView(@Nullable View userContentView,
+          Bundle savedInstanceState) {
+        //Setting up the navigation view.
+        Log.d("setupBottomNavigationView").v(savedInstanceState);
+
+        boolean scrollEnabled =
+              userContentView != null && userContentView instanceof NestedScrollingChild;
+        if (scrollEnabled) {
+            mBottomNavigationUserContentView = userContentView;
+        }
+        if (mBottomNavigationWidget != null
+              /*&& mBottomNavigationUserContentView == userContentView*/) {
+            mBottomNavigationWidget.setScrollAware(scrollEnabled);
+            showHideBottomBar(true);
+            return;
+        }
+        mBottomNavigationWidget =
+              BottomNavigationWidget.attach(mCoordinatorLayout, mBottomNavigationUserContentView,
+                                            getLayoutInflater(), savedInstanceState)
+                                    .setScrollAware(scrollEnabled);
+        mBottomNavigationWidget.setOnNavigationItemSelectedListener(
+              item -> {
+                  handleNavigation(
+                        EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
+                                    .addParam(EventParam.PRM_ITEM_ID, item.getItemId())
+                  );
+                  return true;
+              }
+        );
+        mBottomNavigationWidget.setPresenter(mBottomNavigationMenuPresenter);
+    }
+
+    public void showHideBottomBar(final boolean show) {
+        Log.d("showHideBottomBar", show);
+        if (mBottomNavigationWidget != null) {
+            mBottomNavigationWidget.toggleVisibility(show);
+        }
     }
 
     @Override
@@ -273,6 +361,8 @@ public class MainActivity extends MultiFragmentActivity implements
                                                   itemId == R.id.action_xbox360
                                                   ? ApiSettings.LIST_XBOX360
                                                   : ApiSettings.LIST_XBOXONE)
+                                             .put(ApiSettings.KEY_API_ACTION,
+                                                  ApiSettings.ACTION_LIST_GAMES)
                           ));
                     break;
                 case R.id.action_settings:
@@ -375,6 +465,18 @@ public class MainActivity extends MultiFragmentActivity implements
           final BundleWrapper instanceBundleWrapper) {
         return Optional.of((T) GameTitleTitleListFragment.newInstance(
               instanceBundleWrapper.put(ApiSettings.KEY_API_LIST_TYPE, ApiSettings.LIST_XBOXONE)));
+    }
+
+    @Override public List<MenuItem> getMenuItems() {
+        return mNavigationMenuPresenter.getMenuItems();
+    }
+
+    public @MenuRes int getMenuResource() {
+        return R.menu.menu_navigation;
+    }
+
+    @Override public boolean shouldDefaultSelect(final MenuItem menuItem) {
+        return mBottomNavigationMenuPresenter.getMenuItemFilter().call(menuItem);
     }
 
     public void setOnGestureListener(final GestureDetector.OnGestureListener gl) {

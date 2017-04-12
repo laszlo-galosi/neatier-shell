@@ -23,17 +23,18 @@ allprojects {
  * may cause breakage in the code with automatic upgrade)
  **/
 def supportVersion = '25.0.0'
+def gmsVersion = '10.0.1'
 ext.versions = [//Android framework
-                code                         : 2,
-                name                         : '1.2',
+                code                         : 1,
+                name                         : '1.0',
 
-                androidBuildToolsVersion     : "24.0.3",
+                androidBuildToolsVersion     : "25.0.2",
                 androidMinSdkVersion         : 16,
                 androidTargetSdkVersion      : 25,
                 androidCompileSdkVersion     : 25,
                 multidexVersion              : '1.0.1',
 
-                androidGradlePlugin          : '2.2.2',
+                androidGradlePlugin          : '2.3.0',
                 aptGradlePlugin              : '1.8',
                 paperworkGradlePlugin        : '1.2.7',
                 retrolambdaGradlePlugin      : '3.2.5',
@@ -53,10 +54,10 @@ ext.versions = [//Android framework
                 supportPreferenceVersion     : supportVersion,
 
                 //Google libraries
-                googlePlayServicesVersion    : '9.6.1',
-                gAnalyticsVersion            : '9.6.1',
-                GCMVersion                   : '9.6.1',
-                FCMVersion                   : '9.6.1',
+                googlePlayServicesVersion    : gmsVersion,
+                gAnalyticsVersion            : gmsVersion,
+                GCMVersion                   : gmsVersion,
+                FCMVersion                   : gmsVersion,
 
                 //Optional, Collections, Guava like but lightweight on method count library
                 arrowVersion                 : '1.0.0',
@@ -73,14 +74,16 @@ ext.versions = [//Android framework
 
                 //Libraries used for application building, Networking, Threading etc.
                 butterKnifeVersion           : '8.0.1',
-                rxJavaVersion                : '1.1.3',
+                rxJavaVersion                : '1.2.4',
                 rxLintVersion                : '1.0',
-                rxAndroidVersion             : '0.24.0',
+                rxAndroidVersion             : '1.2.1',
+                rxBindingVersion             : '1.0.0',
+                rxAnimVersion                : '0.8.2',
                 gsonVersion                  : '2.6.1',
                 retrofitVersion              : '2.1.0',
                 okHttpVersion                : '3.2.0',
                 picassoVersion               : '2.5.2',
-                androidAnnotationsVersion    : '23.2.1',
+                androidAnnotationsVersion    : '24.2.0',
 
                 //helper libraries which substitutes default framework solution
                 // of a specified task with more usable API.
@@ -130,6 +133,8 @@ ext.appBuildingDependencies =
      rxJava               : "io.reactivex:rxjava:${versions.rxJavaVersion}",
      rxLint               : "nl.littlerobots.rxlint:rxlint:$versions.rxLintVersion",
      rxAndroid            : "io.reactivex:rxandroid:${versions.rxAndroidVersion}",
+     rxBinding            : "com.jakewharton.rxbinding:rxbinding:${versions.rxBindingVersion}",
+     rxAnim               : "oxim.digital:rxanim:${versions.rxAnimVersion}",
      arrow                : "com.fernandocejas:arrow:${versions.arrowVersion}",
      autoValue            : "com.google.auto.value:auto-value:${versions.autoValueVersion}",
      autoValueGson        : "com.ryanharter.auto.value:auto-value-gson:${versions.autoValueGsonVersion}",
@@ -152,19 +157,21 @@ ext.appBuildingDependencies =
      gmsIdentity          : "com.google.android.gms:play-services-identity:${versions.googlePlayServicesVersion}",
      gmsPlus              : "com.google.android.gms:play-services-plus:${versions.googlePlayServicesVersion}",
      gmsMaps              : "com.google.android.gms:play-services-maps:${versions.googlePlayServicesVersion}",
+     gmsFit               : "com.google.android.gms:play-services-fitness:${versions.googlePlayServicesVersion}",
+     gmsAuth              : "com.google.android.gms:play-services-auth:${versions.googlePlayServicesVersion}",
      gmsLocation          : "com.google.android.gms:play-services-location:${versions.googlePlayServicesVersion}",
      butterKnife          : "com.jakewharton:butterknife:${versions.butterKnifeVersion}",
      butterKnifeCompiler  : "com.jakewharton:butterknife-compiler:${versions.butterKnifeVersion}",
      trikitaLog           : "co.trikita:log:${versions.trikitaLogVersion}",
 
-     leakcanary_debug      : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanaryVersion}",
-     leakcanary_release    : "com.squareup.leakcanary:leakcanary-android-no-op:${versions.leakCanaryVersion}",
-     jodaTimeAndroid       : "net.danlew:android.joda:${versions.jodaTimeAndroidVersion}",
-     calligraphy           : "uk.co.chrisjenx:calligraphy:${versions.calligaphyVersion}",
-     twoWayView            : "org.lucasr.twowayview:twowayview:${versions.twoWayViewVersion}",
-     ray5137Material       : "com.github.rey5137:material:${versions.ray5137MaterialVersion}",
-     twowayview            : "org.lucasr.twowayview:core:${versions.twoWayViewVersion}",
-     twowayviewLayouts     : "org.lucasr.twowayview:layouts:${versions.twoWayViewVersion}",
+     leakcanary_debug     : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanaryVersion}",
+     leakcanary_release   : "com.squareup.leakcanary:leakcanary-android-no-op:${versions.leakCanaryVersion}",
+     jodaTimeAndroid      : "net.danlew:android.joda:${versions.jodaTimeAndroidVersion}",
+     calligraphy          : "uk.co.chrisjenx:calligraphy:${versions.calligaphyVersion}",
+     twoWayView           : "org.lucasr.twowayview:twowayview:${versions.twoWayViewVersion}",
+     ray5137Material      : "com.github.rey5137:material:${versions.ray5137MaterialVersion}",
+     twowayview           : "org.lucasr.twowayview:core:${versions.twoWayViewVersion}",
+     twowayviewLayouts    : "org.lucasr.twowayview:layouts:${versions.twoWayViewVersion}",
      expandableRecyclerView: "com.bignerdranch.android:expandablerecyclerview:${versions.expandableRecycVersion}",
      mpAndroidChart        : "com.github.PhilJay:MPAndroidChart:${versions.mpAndroidChartVersion}",
      picasso               : "com.squareup.picasso:picasso:${versions.picassoVersion}",
@@ -225,7 +232,7 @@ ext {
   //    returns actual minSdk by default but can be configured to return other value
   // on developer's machine. Used when multidexing is active.
   minSdk = {
-    def minSdkPropertyName = 'com.neatier.shell.minSdk'
+    def minSdkPropertyName = 'hu.extremenet.hellobringas.minSdk'
     def realMinSdk = versions.androidMinSdkVersion
 
     project.hasProperty(minSdkPropertyName) ? project.property(minSdkPropertyName) : realMinSdk
