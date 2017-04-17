@@ -17,6 +17,7 @@ package com.neatier.shell.internal.di;
 import com.neatier.shell.appframework.helpers.PermissionInteraction;
 import com.neatier.shell.home.di.HomeComponent;
 import com.neatier.shell.home.di.HomeModule;
+import com.neatier.shell.navigation.NavigationMenu;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
 import com.neatier.shell.navigation.bottomnav.BottomNavigationMenuPresenter;
 import com.neatier.shell.xboxgames.di.XboxComponent;
@@ -33,6 +34,8 @@ import dagger.Component;
 })
 public interface MainComponent extends ActivityComponent {
     NavigationMenuPresenter navigationMenuPresenter();
+
+    NavigationMenu.NavigationMenuController navigationMenuController();
 
     BottomNavigationMenuPresenter bottomNavigationMenuPresenter();
 

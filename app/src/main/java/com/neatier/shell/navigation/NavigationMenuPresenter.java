@@ -17,10 +17,13 @@ package com.neatier.shell.navigation;
 import android.view.MenuItem;
 import com.neatier.shell.appframework.AppMvp;
 import java.util.List;
+import rx.Observable;
 
 /**
  * Created by László Gálosi on 18/05/16
  */
 public interface NavigationMenuPresenter extends AppMvp.Presenter {
     List<MenuItem> getMenuItems();
+
+    Observable<NavigationMenu$NavigationMenuModel_> getMenuItemStream();
 }

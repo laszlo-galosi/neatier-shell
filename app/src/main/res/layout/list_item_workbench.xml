@@ -67,7 +67,7 @@
             android:paddingTop="8dp"
             style="@style/AppTextView.normal.strong"
             android:textSize="14sp"
-            android:drawableRight="@drawable/ic_trophy_gold_18dp"
+            tools:drawableRight="@drawable/ic_trophy_gold_18dp"
             android:drawablePadding="4dp"
             android:textColor="@color/colorGold"
             tools:text="12/48"
@@ -84,7 +84,7 @@
             style="@style/AppTextView.normal.strong"
             android:textSize="14sp"
             android:textColor="@color/colorTextSecondary"
-            android:drawableRight="@drawable/ic_gamerscore_24dp"
+            tools:drawableRight="@drawable/ic_gamerscore_24dp"
             android:drawablePadding="4dp"
             tools:text="100/1000"
         />

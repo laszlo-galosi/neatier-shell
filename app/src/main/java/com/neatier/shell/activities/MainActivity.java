@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.fernandocejas.arrow.collections.Lists;
 import com.fernandocejas.arrow.optional.Optional;
 import com.neatier.commons.helpers.BundleWrapper;
 import com.neatier.commons.helpers.KeyValuePairs;
@@ -65,19 +66,23 @@ import com.neatier.shell.internal.di.HasComponent;
 import com.neatier.shell.internal.di.MainComponent;
 import com.neatier.shell.internal.di.MainModule;
 import com.neatier.shell.navigation.MvpNavigationView;
-import com.neatier.shell.navigation.NavigationMenuItemAdapter;
+import com.neatier.shell.navigation.NavigationMenu;
+import com.neatier.shell.navigation.NavigationMenu$NavigationMenuModel_;
+import com.neatier.shell.navigation.NavigationMenu.NavigationMenuController;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
 import com.neatier.shell.navigation.bottomnav.BottomNavigationMenuPresenter;
 import com.neatier.shell.navigation.bottomnav.BottomNavigationWidget;
 import com.neatier.shell.xboxgames.GameTitleTitleListFragment;
 import java.util.List;
 import javax.inject.Inject;
+import rx.Observable;
 import trikita.log.Log;
 
 public class MainActivity extends MultiFragmentActivity implements
                                                         HasComponent<MainComponent>,
                                                         MvpNavigationView,
-                                                        ViewTreeObserver.OnGlobalLayoutListener {
+                                                        ViewTreeObserver.OnGlobalLayoutListener,
+                                                        NavigationMenuController.AdapterCallbacks {
 
     @BindView(R.id.content_main) View mMainContentView;
     @BindView(R.id.nav_view) NavigationView mNavigationView;
@@ -87,13 +92,13 @@ public class MainActivity extends MultiFragmentActivity implements
 
     @Inject NavigationMenuPresenter mNavigationMenuPresenter;
     @Inject BottomNavigationMenuPresenter mBottomNavigationMenuPresenter;
+    @Inject NavigationMenuController mNavMenuController;
     private boolean mLayoutReady;
 
     private boolean mInitWithError;
     private boolean mWaitingForModelUpdate;
     private MainComponent mainComponent;
     private GestureDetectorCompat mGestureDetector;
-    private NavigationMenuItemAdapter mNavMenuAdapter;
     private View mBottomNavigationUserContentView;
     @Inject PermissionInteraction permissionInteraction;
 
@@ -125,12 +130,13 @@ public class MainActivity extends MultiFragmentActivity implements
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         initializeInjector();
         mNavigationMenuPresenter = getComponent().navigationMenuPresenter();
+        mNavMenuController = getComponent().navigationMenuController();
         mBottomNavigationMenuPresenter = getComponent().bottomNavigationMenuPresenter();
         permissionInteraction = getComponent().permissionInteraction();
         mNavigationMenuPresenter.setView(this);
         mBottomNavigationMenuPresenter.setView(this);
         setupNavigationView();
-        setupBottomNavigationView(null, savedInstanceState);
+        //setupBottomNavigationView(null, savedInstanceState);
 
         //Creating a main bundle for arguments.
         mMainBundle = BundleWrapper.wrap(new Bundle());
@@ -187,6 +193,12 @@ public class MainActivity extends MultiFragmentActivity implements
         }
     }
 
+    @Override public void onMenuItemClicked(final NavigationMenu$NavigationMenuModel_ model,
+          final NavigationMenu.MenuItemHolder holder, final View clickedView, final int position) {
+        EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
+                    .addParam(EventParam.PRM_ITEM_ID, (int) model.id()).send();
+    }
+
     private void initializeInjector() {
         mApiParams = new KeyValuePairs<>(2);
         this.mainComponent = createComponent();
@@ -223,8 +235,23 @@ public class MainActivity extends MultiFragmentActivity implements
         } else {
             if (!mWaitingForModelUpdate) {
                 mNavigationMenuPresenter.initialize();
+                setNavigationMenuItems();
             }
         }
+    }
+
+    private void setNavigationMenuItems(Long... selectedIds) {
+        List<Long> selection = Lists.newArrayList(selectedIds);
+        List<NavigationMenu$NavigationMenuModel_> navModels = Lists.newArrayList();
+        mNavigationMenuPresenter
+              .getMenuItemStream()
+              .flatMap(item -> Observable.just(
+                    item.selected(selection.contains(item.id()))
+              ))
+              .collect(() -> navModels, (list, model) -> list.add(model))
+              .subscribe(modelList -> {
+                  mNavMenuController.setMenuItems(modelList);
+              });
     }
 
     @Override
@@ -285,7 +312,6 @@ public class MainActivity extends MultiFragmentActivity implements
     @Override
     public void onModelReady() {
         mLayoutReady = true;
-        mNavMenuAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -328,7 +354,7 @@ public class MainActivity extends MultiFragmentActivity implements
                         EventBuilder.withItemAndType(Item.NAV_MENU_ITEM, Event.EVT_NAVIGATE)
                                     .addParam(EventParam.PRM_ITEM_ID, item.getItemId())
                   );
-                  return true;
+                  return false;
               }
         );
         mBottomNavigationWidget.setPresenter(mBottomNavigationMenuPresenter);
@@ -430,16 +456,11 @@ public class MainActivity extends MultiFragmentActivity implements
 
         //final ItemClickSupport itemClick = ItemClickSupport.addTo(mNavMenuRecyclerView);
         //itemClick.setOnItemClickListener(this);
-        if (mNavMenuAdapter == null) {
-            mNavMenuAdapter =
-                  new NavigationMenuItemAdapter(
-                        this,
-                        R.layout.list_item_navmenu, 48,
-                        mNavigationMenuPresenter.getMenuItems()
-                  ).withHeader(R.layout.widget_nav_header);
-        }
-        mNavMenuRecyclerView.setAdapter(mNavMenuAdapter);
         mNavMenuRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mNavMenuController.withCallbacks(this);
+        mNavMenuRecyclerView.setAdapter(mNavMenuController.getAdapter());
+        mNavMenuRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mNavMenuController.requestModelBuild();
         mNavMenuRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(this);
     }
 

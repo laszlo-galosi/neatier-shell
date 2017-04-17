@@ -74,6 +74,31 @@ public class XmlNavigationMenuPresenterImpl extends BasePresenterImpl
         getMenuItemsAsListStream(menu).subscribe();
     }
 
+    @Override public Observable<NavigationMenu$NavigationMenuModel_> getMenuItemStream() {
+        Context context = mView.getContext();
+        MenuBuilder menu = new MenuBuilder(context);
+        MenuInflater mi = new MenuInflater(context);
+        mi.inflate(((MvpNavigationView) mView).getMenuResource(), menu);
+        return Observable
+              .range(0, menu.size())
+              .flatMap(i -> Observable.just(menu.getItem(i)))
+              .switchMap(menuItem -> {
+                  if (menuItem.hasSubMenu()) {
+                      return Observable
+                            .just(menuItem).concatWith(
+                                  Observable.range(0, menuItem.getSubMenu().size())
+                                            .flatMap(i -> Observable.just(
+                                                  menuItem.getSubMenu().getItem(i)
+                                            ).filter(getMenuItemFilter()))
+                            ).filter(getSubMenuFilter());
+                  }
+                  return Observable.just(menuItem).filter(getMenuItemFilter());
+              }).flatMap(menuItem -> Observable.just(
+                    NavigationMenu.NavigationMenuModel
+                          .from(menuItem)
+              ));
+    }
+
     public Observable<List<MenuItem>> getMenuItemsAsListStream(final MenuBuilder menu) {
         return Observable.range(0, menu.size())
                          .flatMap(i -> Observable.just(menu.getItem(i)))

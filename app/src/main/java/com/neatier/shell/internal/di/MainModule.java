@@ -35,6 +35,7 @@ import com.neatier.shell.eventbus.EventParam;
 import com.neatier.shell.eventbus.Item;
 import com.neatier.shell.eventbus.RxBus;
 import com.neatier.shell.factorysettings.developer.DeveloperSettings;
+import com.neatier.shell.navigation.NavigationMenu;
 import com.neatier.shell.navigation.NavigationMenuPresenter;
 import com.neatier.shell.navigation.XmlNavigationMenuPresenterImpl;
 import com.neatier.shell.navigation.bottomnav.BottomNavigationMenuPresenter;
@@ -65,6 +66,11 @@ public class MainModule {
 
     @Provides @PerActivity protected NavigationMenuPresenter provideNavigationMenuPresenter() {
         return new XmlNavigationMenuPresenterImpl();
+    }
+
+    @Provides @PerActivity NavigationMenu.NavigationMenuController proNavigationMenuController(
+          Context context) {
+        return new NavigationMenu.NavigationMenuController(context);
     }
 
     @Provides @PerActivity
