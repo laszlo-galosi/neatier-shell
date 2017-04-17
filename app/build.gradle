@@ -21,7 +21,7 @@ apply plugin: 'io.fabric'
 apply from: '../dependencies.gradle'
 //Dagger 2 annotation processor
 //Dagger 2 annotation processor
-apply plugin: 'com.neenbedankt.android-apt'
+//apply plugin: 'com.neenbedankt.android-apt'
 //Retrolambda
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.fernandocejas.frodo'
@@ -156,7 +156,7 @@ dependencies {
   compile appBuildingDependencies.multidex
 
   //=======    dependency Injection Dagger 2 related
-  apt appBuildingDependencies.daggerCompiler
+  annotationProcessor appBuildingDependencies.daggerCompiler
   compile appBuildingDependencies.dagger
   compile appBuildingDependencies.javaxInject
 
@@ -173,7 +173,7 @@ dependencies {
   compile appBuildingDependencies.supportDesign
   //  compile appBuildingDependencies.supportPreference
   compile appBuildingDependencies.butterKnife
-  apt appBuildingDependencies.butterKnifeCompiler
+  annotationProcessor appBuildingDependencies.butterKnifeCompiler
 
   //=======    libraries on demand per project
   compile appBuildingDependencies.trikitaLog
@@ -182,8 +182,8 @@ dependencies {
   compile appBuildingDependencies.jodaTimeAndroid
   compile appBuildingDependencies.picasso
   compile appBuildingDependencies.calligraphy
-  compile 'com.airbnb.android:epoxy:1.4.0'
-  apt 'com.airbnb.android:epoxy-processor:1.4.0'
+  compile 'com.airbnb.android:epoxy:2.0.0'
+  annotationProcessor 'com.airbnb.android:epoxy-processor:2.0.0'
 
   //Google play services
   compile appBuildingDependencies.fcm
