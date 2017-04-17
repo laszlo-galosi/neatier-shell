@@ -6,4 +6,5 @@
     <dimen name="nav_header_height">160dp</dimen>
     <dimen name="thumb_width">56dp</dimen>
     <dimen name="card_width">180dp</dimen>
+    <dimen name="card_height">256dp</dimen>
 </resources>

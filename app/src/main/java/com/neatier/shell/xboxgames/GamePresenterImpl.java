@@ -14,6 +14,8 @@
 
 package com.neatier.shell.xboxgames;
 
+import android.content.Context;
+import android.net.Uri;
 import com.fernandocejas.arrow.collections.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -24,6 +26,7 @@ import com.neatier.commons.helpers.JsonSerializer;
 import com.neatier.commons.helpers.LongTaskOnIOScheduler;
 import com.neatier.commons.helpers.LongTaskScheduler;
 import com.neatier.commons.helpers.RxUtils;
+import com.neatier.shell.R;
 import com.neatier.shell.appframework.BasePresenterImpl;
 import com.neatier.shell.data.network.ApiSettings;
 import com.neatier.shell.data.repository.DataSources;
@@ -31,6 +34,7 @@ import com.neatier.shell.eventbus.EventBuilder;
 import com.neatier.shell.internal.di.PerScreen;
 import com.neatier.shell.xboxgames.GameTitleView.GameTitleItemModel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.inject.Inject;
@@ -44,6 +48,8 @@ import rx.Observable;
 @PerScreen
 public class GamePresenterImpl extends BasePresenterImpl
       implements GamePresenter, HeapHog {
+
+    public static final String ANDROID_RESOURCE = "android.resource://";
 
     private List<GameTitleItemModel> mItemList = new ArrayList<>(25);
     private DataSources.SimpleJsonResponseDataSource simpleApiDataSource;
@@ -93,6 +99,8 @@ public class GamePresenterImpl extends BasePresenterImpl
                            .subscribe(new PresenterSubscriber<GameTitleView$GameTitleItemModel_>() {
                                @Override public void onCompleted() {
                                    super.onCompleted();
+                                   Collections.sort(mItemList,
+                                                    (o2, o1) -> o1.date.compareTo(o2.date));
                                    if (mView != null) {
                                        mView.onModelReady();
                                    }
@@ -141,11 +149,14 @@ public class GamePresenterImpl extends BasePresenterImpl
         Integer earnedAchi = serializer.getAsChecked("earnedAchievements", json, Integer.class);
         Integer totalAchi = serializer.getAsChecked("totalAchievements", json, Integer.class);
         String dateString = serializer.getAsChecked("lastUnlock", json, String.class);
+        String imageUrl = resourceIdToUri(mView.getContext(), R.drawable.xbox_one_cover).toString();
         switch (listType) {
             case ApiSettings.LIST_XBOX360:
                 earnedAchi = serializer.getAsChecked("currentAchievements", json, Integer.class);
                 totalGameScore = serializer.getAsChecked("totalGamerscore", json, Integer.class);
                 dateString = serializer.getAsChecked("lastPlayed", json, String.class);
+                imageUrl =
+                      resourceIdToUri(mView.getContext(), R.drawable.xbox_360_cover).toString();
                 break;
         }
         DateTime dateTime = DateTimeHelper.parseDate(dateString, ApiSettings.API_DATE_TIME_PATTERN,
@@ -153,13 +164,20 @@ public class GamePresenterImpl extends BasePresenterImpl
         GameTitleView$GameTitleItemModel_ itemModel =
               new GameTitleView$GameTitleItemModel_()
                     .title(name)
-                    .achivement(totalAchi == null ? String.valueOf(earnedAchi)
-                                                  : String.format("%d/%d", earnedAchi, totalAchi))
+                    .achievement(totalAchi == null ? String.valueOf(earnedAchi)
+                                                   : String.format("%d/%d", earnedAchi, totalAchi))
+                    .imageUrl(imageUrl)
+                    .date(dateTime)
                     .gamerScore(String.format("%d/%d", gameScore, totalGameScore));
         return itemModel;
     }
 
     @Override public List<GameTitleItemModel> getItems() {
         return mItemList;
+    }
+
+    private static Uri resourceIdToUri(Context context, int resourceId) {
+        return Uri.parse(
+              String.format("%s%s/%d", ANDROID_RESOURCE, context.getPackageName(), resourceId));
     }
 }

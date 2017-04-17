@@ -15,6 +15,7 @@
 package com.neatier.shell.xboxgames;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -41,6 +42,7 @@ import com.neatier.shell.eventbus.Item;
 import com.neatier.shell.internal.di.HasComponent;
 import com.neatier.shell.xboxgames.di.XboxComponent;
 import com.neatier.shell.xboxgames.di.XboxModule;
+import com.neatier.widgets.ThemeUtil;
 import com.neatier.widgets.recyclerview.ItemClickSupport;
 import com.neatier.widgets.recyclerview.ItemSpacingDecoration;
 import com.squareup.picasso.Picasso;
@@ -203,12 +205,16 @@ public class GameTitleTitleListFragment extends BaseFragment implements
 
     @Override public void showProgress() {
         Log.v(getFragmentTag(), "showProgress");
-        mSwipeRefreshLayout.setRefreshing(true);
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setRefreshing(true);
+        }
     }
 
     @Override public void hideProgress() {
         Log.v(getFragmentTag(), "hideProgress");
-        mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     @Override
@@ -294,10 +300,7 @@ public class GameTitleTitleListFragment extends BaseFragment implements
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLongClickable(true);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-        //mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.addItemDecoration(getOrCreateDivider());
-        //final ItemClickSupport itemClickSupport = ItemClickSupport.addTo(mRecyclerView);
-        //itemClickSupport.setOnItemClickListener(this);
         mListingAdapter.setDataSet(mWorkbenchPresenter.getItems());
         mRecyclerView.swapAdapter(mListingAdapter, false);
         mSwipeRefreshLayout.setOnRefreshListener(this);
@@ -324,7 +327,15 @@ public class GameTitleTitleListFragment extends BaseFragment implements
 
     private RecyclerView.ItemDecoration getOrCreateDivider() {
         if (mItemSpacingDecoration == null) {
-            mItemSpacingDecoration = new ItemSpacingDecoration(getContext(), 8);
+            mItemSpacingDecoration = new ItemSpacingDecoration(getContext(), 16) {
+                @Override
+                public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
+                      RecyclerView.State state) {
+                    super.getItemOffsets(outRect, view, parent, state);
+                    int padding8 = ThemeUtil.dpToPx(getContext(), 16);
+                    outRect.set(padding8, mItemSpacing, padding8, 0);
+                }
+            };
         }
         return mItemSpacingDecoration;
     }

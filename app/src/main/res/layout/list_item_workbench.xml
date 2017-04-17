@@ -11,85 +11,107 @@
   ~  this material is strictly forbidden unless prior written permission is obtained from
   ~ Extreme Net Ltd.
   -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/border_dropshadow_2dp"
->
-  <ImageView
-      android:id="@+id/itemImage"
-      android:layout_width="match_parent"
-      android:layout_height="@dimen/card_width"
-      android:scaleType="centerCrop"
-      android:adjustViewBounds="true"
-      android:src="@drawable/img_placeholder"
-  />
-  <LinearLayout
-      android:orientation="vertical"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+  <data>
+    <variable
+        name="viewModel"
+        type="com.neatier.shell.xboxgames.GameTitleView.GameTitleItemModel"/>
+    <variable
+        name="achiDrawable"
+        type="android.graphics.drawable.Drawable"/>
+    <variable
+        name="gamerScoreDrawable"
+        type="android.graphics.drawable.Drawable"/>
+  </data>
+  <FrameLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
   >
-    <TextView
-        android:id="@+id/itemTitle"
+    <ImageView
+        android:id="@+id/itemImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.5"
-        android:layout_gravity="left|top"
-        android:maxLines="4"
-        android:ellipsize="end"
-        tools:text="@string/lorem_ipsum"
-        style="@style/AppTextView.title"
-        android:textSize="14sp"
-        android:padding="8dp"
-        android:textStyle="bold"
+        android:scaleType="centerInside"
+        android:adjustViewBounds="true"
+        android:src="@{viewModel.titleImage}"
+        tools:src="@drawable/xbox_one_cover"
+        android:background="@drawable/background_image_overlay"
     />
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="@dimen/material_padding"
-        android:layout_gravity="bottom|right"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="24dp"
     >
+      <TextView
+          android:id="@+id/itemTitle"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="0.5"
+          android:gravity="left|top"
+          android:maxLines="4"
+          android:ellipsize="end"
+          android:text="@{viewModel.title}"
+          tools:text="@string/lorem_ipsum"
+          android:textColor="@color/white"
+          style="@style/AppTextView.title"
+          android:textSize="14sp"
+          android:padding="8dp"
+          android:textStyle="bold"
+      />
       <LinearLayout
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:orientation="vertical"
+          android:orientation="horizontal"
+          android:paddingLeft="@dimen/material_padding"
+          android:layout_gravity="bottom|right"
       >
-        <TextView
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/itemAchi"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:paddingRight="8dp"
-            android:paddingBottom="2dp"
-            android:paddingTop="8dp"
-            style="@style/AppTextView.normal.strong"
-            android:textSize="14sp"
-            tools:drawableRight="@drawable/ic_trophy_gold_18dp"
-            android:drawablePadding="4dp"
-            android:textColor="@color/colorGold"
-            tools:text="12/48"
-        />
-        <TextView
-            android:id="@+id/itemScore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:gravity="right|center_vertical"
-            android:paddingRight="8dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="4dp"
-            style="@style/AppTextView.normal.strong"
-            android:textSize="14sp"
-            android:textColor="@color/colorTextSecondary"
-            tools:drawableRight="@drawable/ic_gamerscore_24dp"
-            android:drawablePadding="4dp"
-            tools:text="100/1000"
-        />
+            android:orientation="vertical"
+        >
+          <TextView
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/itemAchi"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="right|center_vertical"
+              android:paddingRight="8dp"
+              android:paddingBottom="8dp"
+              android:paddingTop="8dp"
+              style="@style/AppTextView.normal.strong"
+              android:textSize="14sp"
+              tools:drawableRight="@drawable/ic_trophy_gold_18dp"
+              android:drawableRight="@{achiDrawable}"
+              android:drawablePadding="4dp"
+              android:textColor="@color/colorGold"
+              tools:text="12/48"
+              android:text="@{viewModel.achievement}"
+          />
+          <TextView
+              android:id="@+id/itemScore"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="right|center_vertical"
+              android:gravity="right|center_vertical"
+              android:paddingRight="8dp"
+              android:paddingTop="0dp"
+              android:paddingBottom="8dp"
+              style="@style/AppTextView.normal.strong"
+              android:textSize="14sp"
+              android:textColor="@color/white"
+              tools:drawableRight="@drawable/ic_gamerscore_24dp"
+              android:drawableRight="@{gamerScoreDrawable}"
+              android:drawablePadding="4dp"
+              tools:text="100/1000"
+              android:text="@{viewModel.gamerScore}"
+          />
+        </LinearLayout>
       </LinearLayout>
-    </LinearLayout>
 
-  </LinearLayout>
-</FrameLayout>
+    </LinearLayout>
+  </FrameLayout>
+</layout>
