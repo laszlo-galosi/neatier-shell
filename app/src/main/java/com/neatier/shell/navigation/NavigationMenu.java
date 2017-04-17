@@ -30,6 +30,7 @@ import com.neatier.shell.R;
 import com.neatier.shell.appframework.AppMvp;
 import com.neatier.shell.widgets.BaseEpoxyModelAdapter;
 import com.neatier.shell.xboxgames.BaseEpoxyHolder;
+import com.neatier.widgets.helpers.DrawableHelper;
 import com.neatier.widgets.helpers.WidgetUtils;
 import java.util.Collection;
 import java.util.Collections;
@@ -100,11 +101,19 @@ public interface NavigationMenu extends AppMvp.LongTaskBaseView {
     }
 
     class MenuHeaderHolder extends BaseEpoxyHolder {
+        @Nullable @BindView(R.id.itemIcon) ImageView mItemIconView;
         View mItemView;
 
         @Override protected void bindView(final View itemView) {
             super.bindView(itemView);
             mItemView = itemView;
+            mItemIconView.setImageDrawable(
+                  DrawableHelper.withContext(itemView.getContext())
+                                .withDrawable(R.drawable.ic_neatier_logo)
+                                .withColorRes(R.color.white)
+                                .tint().get()
+            );
+
         }
     }
 

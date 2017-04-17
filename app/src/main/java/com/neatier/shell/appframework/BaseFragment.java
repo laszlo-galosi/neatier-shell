@@ -405,7 +405,7 @@ public abstract class BaseFragment extends Fragment implements AppMvp.LongTaskBa
     }
 
     public boolean shouldShowLogoOnToolbar() {
-        return true;
+        return false;
     }
 
     public List<Integer> getDisplayableToolbarIcons() {
