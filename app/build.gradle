@@ -19,12 +19,10 @@ repositories {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply from: '../dependencies.gradle'
-//Dagger 2 annotation processor
-//Dagger 2 annotation processor
-//apply plugin: 'com.neenbedankt.android-apt'
-//Retrolambda
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.fernandocejas.frodo'
+apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'com.vanniktech.android.apk.size'
 
 android {
   compileSdkVersion versions.androidCompileSdkVersion
@@ -54,6 +52,12 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
+  if (project.hasProperty('devBuild')) {
+    splits.abi.enable = false
+    splits.density.enable = false
+    aaptOptions.cruncherEnabled = false
+  }
+
   signingConfigs {
     debug {
       storeFile file('../buildsystem/debug.keystore')
@@ -79,7 +83,10 @@ android {
     debug {
       minifyEnabled false
       signingConfig signingConfigs.debug
-      applicationIdSuffix '.debug'
+      //      applicationIdSuffix '.debug'
+      debuggable true
+      //Disable Crashlytics will generate a new build id for every build.
+      ext.alwaysUpdateBuildId = false
     }
   }
 
@@ -120,14 +127,14 @@ android {
     exclude 'META-INF/NOTICE'
     exclude 'META-INF/LICENSE'
     exclude 'META-INF/services/javax.annotation.processing.Processor'
-    //becasue pf Espresso and Dagger compiler conflict
+    //because of Espresso and Dagger compiler conflict
     exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
     exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
   }
 
-  dexOptions {
+/*  dexOptions {
     javaMaxHeapSize "4g"
-  }
+  }*/
 
   retrolambda {
     jvmArgs '-noverify'
@@ -187,11 +194,13 @@ dependencies {
   compile appBuildingDependencies.jodaTimeAndroid
   compile appBuildingDependencies.picasso
   compile appBuildingDependencies.calligraphy
-  compile 'com.airbnb.android:epoxy:2.0.0'
-  annotationProcessor 'com.airbnb.android:epoxy-processor:2.0.0'
-
+  compile appBuildingDependencies.epoxy
+  annotationProcessor appBuildingDependencies.epoxyProcessor
   //Google play services
   compile appBuildingDependencies.fcm
+  provided appBuildingDependencies.autoValue
+  annotationProcessor appBuildingDependencies.autoValueGson
+  provided appBuildingDependencies.autoValueAnnotations
 
   //Crashlytics
   compile('com.crashlytics.sdk.android:crashlytics:2.6.1@aar') {

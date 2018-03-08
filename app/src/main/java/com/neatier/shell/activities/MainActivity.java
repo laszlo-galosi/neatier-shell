@@ -345,8 +345,8 @@ public class MainActivity extends MultiFragmentActivity implements
             return;
         }
         mBottomNavigationWidget =
-              BottomNavigationWidget.attach(mCoordinatorLayout, mBottomNavigationUserContentView,
-                                            getLayoutInflater(), savedInstanceState)
+                BottomNavigationWidget.attach(mCoordinatorLayout, mBottomNavigationUserContentView,
+                        getLayoutInflater(), savedInstanceState)
                                     .setScrollAware(scrollEnabled);
         mBottomNavigationWidget.setOnNavigationItemSelectedListener(
               item -> {

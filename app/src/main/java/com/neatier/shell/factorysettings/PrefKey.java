@@ -85,7 +85,7 @@ public class PrefKey {
     }
 
     public PrefKey clearFrom(final SharedKeyValueStore<String, Object> sharedKeyValueStore) {
-        sharedKeyValueStore.remove(name);
+        sharedKeyValueStore.remove(name).apply();
         return this;
     }
 
