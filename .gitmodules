@@ -1,3 +1,4 @@
 [submodule "neatier-commons"]
 	path = neatier-commons
-	url = https://github.com/laszlo-galosi/neatier-commons.git
+	url = git@gitlab.com:exnet/commons/android/neatier-commons.git
+	branch = master
